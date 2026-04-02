@@ -1,0 +1,28 @@
+name: qdcr-net
+
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+
+dependencies:
+  - python=3.10
+  - pytorch=2.4
+  - torchvision=0.19
+  - torchaudio=2.4
+  - pytorch-cuda=12.1
+  - numpy
+  - scipy
+  - pandas
+  - pyyaml
+  - pillow
+  - opencv
+  - matplotlib
+  - seaborn
+  - tqdm
+  - tensorboard
+  - scikit-learn
+  - rich
+  - pip
+  - pip:
+      - einops
