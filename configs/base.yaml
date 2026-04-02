@@ -1,0 +1,33 @@
+experiment:
+  name: baseline_yolov8s
+  seed: 42
+  output_dir: outputs/checkpoints/baseline_yolov8s
+
+dataset:
+  train_root: data/datasets/URPC2018/train
+  val_root: data/datasets/URPC2018/val
+  num_classes: 4
+  class_names:
+    - holothurian
+    - echinus
+    - starfish
+    - scallop
+  image_size: 640
+  workers: 4
+
+model:
+  name: yolov8s_baseline
+  backbone: yolov8s
+  neck: pafpn
+  head: detect
+
+train:
+  epochs: 300
+  batch_size: 16
+  optimizer: adamw
+  lr: 0.0005
+  weight_decay: 0.0005
+
+eval:
+  conf_thresh: 0.25
+  iou_thresh: 0.5

@@ -1,0 +1,34 @@
+\subsection*{Datasets}
+The planned primary benchmark is URPC2018, which provides four common underwater biological
+categories. To evaluate generalization, we also consider RUOD as a larger and more diverse
+benchmark with more classes and more complex scenes.
+
+\subsection*{Implementation Details}
+The initial baseline is planned around a YOLO-style detector. We will report results on a
+Linux environment with a complete CUDA stack and an RTX 3090 GPU. Evaluation metrics will
+include mAP@0.5, mAP@0.5:0.95, precision, recall, parameter count, GFLOPs, and FPS.
+
+\subsection*{Comparison Experiments}
+The final paper will compare QDCR-Net against standard lightweight detectors and recent
+underwater-oriented baselines. The comparison will emphasize low-visibility performance,
+small-object detection accuracy, and efficiency trade-offs.
+
+\subsection*{Ablation Studies}
+The ablation plan includes:
+\begin{enumerate}[leftmargin=*]
+  \item baseline detector;
+  \item enhanced-input-only detector;
+  \item dual branch without cross residual interaction;
+  \item dual branch with cross residual interaction;
+  \item dual branch with cross residual interaction and quality-aware fusion;
+  \item full model with the small-object neck.
+\end{enumerate}
+
+Additional mechanism analysis will compare concat/add fusion against cross-residual design,
+single-direction versus bidirectional interaction, fixed versus dynamic fusion, and different
+insertion stages for the interaction block.
+
+\subsection*{Visualization and Robustness Analysis}
+We will include qualitative detection maps, failure cases, and grouped robustness studies
+under blur, low contrast, and color-cast conditions. Small-object subsets and low-visibility
+subsets will be evaluated separately to verify the intended gains of the method.

@@ -1,0 +1,23 @@
+\subsection*{Underwater Object Detection}
+Underwater object detection has received increasing attention because of its relevance to
+marine robotics and ecological monitoring. Recent methods mainly extend one-stage detectors
+with improved multiscale fusion, lightweight backbones, or attention mechanisms to handle
+complex underwater backgrounds and real-time constraints.
+
+\subsection*{Underwater Image Enhancement for Detection}
+Image enhancement is widely used to mitigate underwater degradation before downstream visual
+tasks. Nevertheless, enhancement does not uniformly improve detector behavior. Its benefits
+depend on degradation type, target scale, and the reliability of the recovered structures.
+This motivates adaptive cooperation between raw and enhanced domains instead of relying on a
+single fixed preprocessing strategy.
+
+\subsection*{Small Object Detection}
+Small object detection remains difficult because small targets occupy limited pixels and are
+easily overwhelmed by background noise. Common strategies include feature pyramid redesign,
+high-resolution detail preservation, shallow feature injection, and task-specific attention.
+
+\subsection*{Multi-Branch Feature Interaction}
+Multi-branch architectures are often used to encode heterogeneous cues. In underwater
+detection, raw and enhanced images provide complementary information. The key challenge is
+not only how to fuse them, but how to prevent noisy or unstable cross-domain interactions.
+This paper addresses that issue through cross-residual exchange and quality-aware fusion.

@@ -1,0 +1,30 @@
+Underwater biological object detection is a practical requirement for marine resource
+survey, ecological monitoring, and autonomous underwater robotics. Compared with common
+in-air visual detection, underwater scenes are more challenging because of absorption,
+backscatter, low contrast, color cast, and motion blur. These degradations are especially
+harmful for small objects whose texture and boundary cues are already weak.
+
+Existing studies typically improve underwater detection in two directions. The first
+direction enhances detection backbones, necks, or heads to improve representation quality.
+The second direction performs underwater image enhancement before detection. However, the
+relationship between enhancement and detection is not always positive. Enhanced images may
+recover contrast and local structure, but they can also introduce artifacts or alter the
+original semantic distribution.
+
+This paper defines underwater detection in low-visibility scenes as a cross-domain
+representation problem between raw and enhanced inputs. Raw images preserve more realistic
+semantic statistics, whereas enhanced images may expose details that benefit small-object
+localization. Based on this observation, we design QDCR-Net, a quality-aware dual-branch
+cross-residual framework that enables complementary modeling between the two domains.
+
+The main contributions are summarized as follows:
+\begin{enumerate}[leftmargin=*]
+  \item We propose a dual-branch underwater detection framework that explicitly models
+  raw-image semantics and enhancement-guided structure for low-visibility scenes.
+  \item We design a bidirectional cross-residual interaction module to exchange stable
+  semantic priors and structural detail responses across branches.
+  \item We introduce a quality-aware dynamic fusion mechanism that adaptively reweights
+  branch contributions according to image quality.
+  \item We add a small-object-oriented neck path to preserve high-resolution detail cues
+  without heavily increasing model complexity.
+\end{enumerate}
