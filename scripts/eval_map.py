@@ -11,7 +11,7 @@ from src.utils.config import load_config
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Evaluate a detection model.")
+    parser = argparse.ArgumentParser(description="Evaluate a detection checkpoint and report mAP metrics.")
     parser.add_argument(
         "--config",
         type=Path,
@@ -25,7 +25,10 @@ def main() -> None:
     args = parse_args()
     config = load_config(args.config)
     trainer = Trainer(config)
-    trainer.evaluate()
+    metrics = trainer.evaluate()
+    print("Evaluation metrics:")
+    for key, value in metrics.items():
+        print(f"  {key}: {value:.6f}")
 
 
 if __name__ == "__main__":

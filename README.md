@@ -48,6 +48,20 @@ conda activate qdcr-net
 This repository is currently scaffolded for a pure PyTorch implementation path. No
 TensorFlow, Paddle, or other training frameworks are required.
 
+## Minimal smoke pipeline
+
+The repository now includes a minimal trainable smoke pipeline:
+
+- `conda run -n yolo python scripts/train.py` runs a short PyTorch training loop and saves a checkpoint under `outputs/checkpoints/`
+- `conda run -n yolo python scripts/eval.py` reloads the latest checkpoint before evaluation
+- `conda run -n yolo python scripts/eval_map.py` computes mAP-style metrics and writes prediction artifacts
+- evaluation currently reports `loss`, `acc`, `box_iou`, `precision`, `recall`, `mAP@0.5`, `mAP@0.5:0.95`, `Params`, `GFLOPs`, and `FPS`
+- metrics are written under `runs/` for TensorBoard-compatible workflows when `torch.utils.tensorboard` is available
+- if no real dataset is present, the loader falls back to synthetic samples
+
+For real data, use YOLO-style image and label pairs under the dataset roots configured in `configs/qdcr_net.yaml`.
+The current implementation trains a fixed-query detector with explicit matching, NMS-based inference, and mAP-style evaluation. A baseline single-branch detector can be trained with `configs/base.yaml`.
+
 ## Next engineering steps
 
 1. Implement the baseline detector and data pipeline.

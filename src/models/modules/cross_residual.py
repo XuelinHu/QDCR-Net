@@ -1,12 +1,23 @@
-from dataclasses import dataclass
+import torch
+from torch import nn
 
 
-@dataclass
-class CrossResidualBlock:
-    """Placeholder module for bidirectional cross-residual interaction."""
+class CrossResidualBlock(nn.Module):
+    """Lightweight bidirectional residual mixing for branch features."""
 
-    in_channels: int
-    out_channels: int
+    def __init__(self, in_channels: int, out_channels: int) -> None:
+        super().__init__()
+        self.raw_to_enhanced = nn.Linear(in_channels, out_channels)
+        self.enhanced_to_raw = nn.Linear(in_channels, out_channels)
+        self.activation = nn.ReLU(inplace=True)
 
-    def __call__(self, raw_feature, enhanced_feature):
-        return raw_feature, enhanced_feature
+    def forward(
+        self,
+        raw_feature: torch.Tensor,
+        enhanced_feature: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        mixed_raw = self.activation(raw_feature + self.enhanced_to_raw(enhanced_feature))
+        mixed_enhanced = self.activation(
+            enhanced_feature + self.raw_to_enhanced(raw_feature)
+        )
+        return mixed_raw, mixed_enhanced

@@ -1,13 +1,17 @@
 experiment:
-  name: qdcr_net_full
+  name: qdcr_net_smoke
   seed: 42
-  output_dir: outputs/checkpoints/qdcr_net_full
+  output_dir: outputs/checkpoints/qdcr_net_smoke
+  runs_dir: runs/qdcr_net_smoke
+  device: cuda
 
 dataset:
-  train_root: data/datasets/URPC2018/train
-  val_root: data/datasets/URPC2018/val
+  train_root: data/datasets/URPC2018/train/images
+  val_root: data/datasets/URPC2018/val/images
   enhanced_root: data/datasets/URPC2018_enhanced
   num_classes: 4
+  synthetic_size: 16
+  max_objects: 8
   class_names:
     - holothurian
     - echinus
@@ -18,6 +22,8 @@ dataset:
 
 model:
   name: qdcr_net
+  feature_dim: 32
+  num_queries: 8
   backbone: dual_branch
   quality_aware: true
   cross_residual_stages:
@@ -26,12 +32,14 @@ model:
   small_object_neck: true
 
 train:
-  epochs: 300
-  batch_size: 16
+  epochs: 2
+  batch_size: 4
+  max_batches_per_epoch: 2
   optimizer: adamw
-  lr: 0.0005
+  lr: 0.001
   weight_decay: 0.0005
 
 eval:
+  max_batches: 2
   conf_thresh: 0.25
   iou_thresh: 0.5

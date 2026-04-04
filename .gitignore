@@ -31,11 +31,25 @@ paper/*.toc
 # Large data and experiment artifacts
 data/datasets/*
 !data/datasets/README.md
+data/raw/*
+!data/raw/README.md
 data/logs/*
 !data/logs/README.md
 data/results/*
 !data/results/README.md
 outputs/checkpoints/*
 !outputs/checkpoints/README.md
+outputs/automation/*
+!outputs/automation/README.md
 outputs/visualizations/*
 !outputs/visualizations/README.md
+runs/*
+!runs/.gitkeep
+
+# Generated configs and local archives
+configs/generated/*.yaml
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
