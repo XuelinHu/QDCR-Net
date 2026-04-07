@@ -1,23 +1,24 @@
 experiment:
-  name: baseline_detector
+  name: baseline_uov2_full
   seed: 42
-  output_dir: outputs/checkpoints/baseline_detector
-  runs_dir: runs/baseline_detector
+  output_dir: outputs/checkpoints/baseline_uov2_full
+  runs_dir: runs/baseline_uov2_full
   device: cuda
 
 dataset:
-  train_root: data/datasets/URPC2018/train/images
-  val_root: data/datasets/URPC2018/val/images
-  enhanced_root: data/datasets/URPC2018_enhanced
-  num_classes: 4
-  synthetic_size: 16
+  train_root: data/datasets/downloads/UOv2/train/images
+  val_root: data/datasets/downloads/UOv2/valid/images
+  enhanced_root: data/datasets/downloads/UOv2/train/images
+  num_classes: 5
+  synthetic_size: 0
   max_objects: 8
   class_names:
-    - holothurian
     - echinus
-    - starfish
+    - holothurian
     - scallop
-  image_size: 640
+    - starfish
+    - waterweeds
+  image_size: 320
   workers: 4
 
 model:
@@ -28,7 +29,7 @@ model:
   head: detect_proxy
 
 train:
-  epochs: 50
+  epochs: 100
   batch_size: 4
   max_batches_per_epoch: 0
   optimizer: adamw
@@ -38,10 +39,11 @@ train:
     enabled: true
     monitor: loss
     mode: min
-    patience: 8
+    patience: 10
     min_delta: 0.0005
 
 eval:
+  checkpoint: best
   max_batches: 0
   conf_thresh: 0.25
   iou_thresh: 0.5

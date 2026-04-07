@@ -48,6 +48,9 @@ conda activate qdcr-net
 This repository is currently scaffolded for a pure PyTorch implementation path. No
 TensorFlow, Paddle, or other training frameworks are required.
 
+The paper-oriented experiment plan is centralized in
+[paper/EXPERIMENT_WORKFLOW.md](/ds1/workspace/ai/QDCR-Net/paper/EXPERIMENT_WORKFLOW.md).
+
 ## Minimal smoke pipeline
 
 The repository now includes a minimal trainable smoke pipeline:
@@ -56,6 +59,7 @@ The repository now includes a minimal trainable smoke pipeline:
 - `conda run -n yolo python scripts/eval.py` reloads the latest checkpoint before evaluation
 - `conda run -n yolo python scripts/eval_map.py` computes mAP-style metrics and writes prediction artifacts
 - evaluation currently reports `loss`, `acc`, `box_iou`, `precision`, `recall`, `mAP@0.5`, `mAP@0.5:0.95`, `Params`, `GFLOPs`, and `FPS`
+- training configs now support early stopping through `train.early_stopping`, and the best validation checkpoint is saved as `best.pt`
 - metrics are written under `runs/` for TensorBoard-compatible workflows when `torch.utils.tensorboard` is available
 - if no real dataset is present, the loader falls back to synthetic samples
 

@@ -25,6 +25,7 @@ class Trainer:
         self.output_dir = Path(experiment_config.get("output_dir", "outputs/checkpoints/qdcr_net_smoke"))
         self.run_dir = Path(experiment_config.get("runs_dir", f"runs/{experiment_config.get('name', 'default')}"))
         self.checkpoint_path = self.output_dir / "latest.pt"
+        self.best_checkpoint_path = self.output_dir / "best.pt"
         self.prediction_path = self.output_dir / "predictions.json"
         self.metrics_path = self.output_dir / "metrics.json"
         self.device = torch.device(
@@ -36,15 +37,24 @@ class Trainer:
         self._set_seed(int(experiment_config.get("seed", 42)))
 
     def fit(self) -> None:
-        train_dataset, _ = self._build_datasets()
+        train_dataset, val_dataset = self._build_datasets()
         model = self._build_model().to(self.device)
         loss_fn = DetectionLoss().to(self.device)
         train_config = self.config.get("train", {})
+        eval_config = self.config.get("eval", {})
+        early_stopping = train_config.get("early_stopping", {})
         optimizer = self._build_optimizer(model)
         tracker = ExperimentTracker(self.run_dir)
         batch_size = min(int(train_config.get("batch_size", 4)), len(train_dataset))
+        eval_batch_size = min(int(train_config.get("batch_size", 4)), len(val_dataset))
         max_batches = int(train_config.get("max_batches_per_epoch", 2))
+        eval_max_batches = int(eval_config.get("max_batches", 2))
         epochs = int(train_config.get("epochs", 1))
+        patience = int(early_stopping.get("patience", 5))
+        min_delta = float(early_stopping.get("min_delta", 1e-4))
+        monitor = str(early_stopping.get("monitor", "loss"))
+        mode = str(early_stopping.get("mode", "min")).lower()
+        enabled = bool(early_stopping.get("enabled", True))
         train_loader = DataLoader(
             train_dataset,
             batch_size=max(batch_size, 1),
@@ -52,15 +62,30 @@ class Trainer:
             num_workers=0,
             collate_fn=self._collate_batch,
         )
+        val_loader = DataLoader(
+            val_dataset,
+            batch_size=max(eval_batch_size, 1),
+            shuffle=False,
+            num_workers=0,
+            collate_fn=self._collate_batch,
+        )
+        best_metric = float("inf") if mode == "min" else float("-inf")
+        epochs_without_improvement = 0
+        best_epoch = 0
 
         self.logger.info(
-            "[train] experiment=%s dataset_size=%s batch_size=%s epochs=%s max_batches=%s device=%s",
+            "[train] experiment=%s dataset_size=%s batch_size=%s epochs=%s max_batches=%s device=%s early_stopping=%s monitor=%s mode=%s patience=%s min_delta=%.6f",
             self.config.get("experiment", {}).get("name", "unknown"),
             len(train_dataset),
             batch_size,
             epochs,
             max_batches,
             self.device,
+            enabled,
+            monitor,
+            mode,
+            patience,
+            min_delta,
         )
 
         try:
@@ -92,7 +117,7 @@ class Trainer:
                 sample_count = 0
 
                 for batch_index, batch in enumerate(train_loader):
-                    if batch_index >= max_batches:
+                    if max_batches > 0 and batch_index >= max_batches:
                         break
 
                     raw_image = batch["raw_image"].to(self.device)
@@ -161,14 +186,65 @@ class Trainer:
                         "device": str(self.device),
                     },
                 )
+                val_metrics = self._evaluate_model(
+                    model=model,
+                    loss_fn=loss_fn,
+                    val_loader=val_loader,
+                    max_batches=eval_max_batches,
+                    conf_thresh=float(eval_config.get("conf_thresh", 0.25)),
+                    iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
+                    tracker=tracker,
+                    tracker_step=epoch_index + 1,
+                )
+                monitored_value = float(val_metrics[monitor])
+                tracker.log_scalar(f"train/early_stop_{monitor}", monitored_value, epoch_index + 1)
+                improved = self._is_improved(
+                    current=monitored_value,
+                    best=best_metric,
+                    mode=mode,
+                    min_delta=min_delta,
+                )
+                if improved:
+                    best_metric = monitored_value
+                    best_epoch = epoch_index + 1
+                    epochs_without_improvement = 0
+                    model.save_checkpoint(
+                        self.best_checkpoint_path,
+                        optimizer=optimizer,
+                        metadata={
+                            "experiment": self.config.get("experiment", {}).get("name", "unknown"),
+                            "epoch": epoch_index + 1,
+                            "samples": sample_count,
+                            "device": str(self.device),
+                            "best_metric": best_metric,
+                            "monitor": monitor,
+                        },
+                    )
+                else:
+                    epochs_without_improvement += 1
                 self.logger.info(
-                    "[train] epoch=%s summary loss=%.4f acc=%.2f iou=%.2f samples=%s",
+                    "[train] epoch=%s summary loss=%.4f acc=%.2f iou=%.2f val_%s=%.4f best=%.4f best_epoch=%s wait=%s/%s samples=%s",
                     epoch_index + 1,
                     epoch_loss_value,
                     epoch_acc_value,
                     epoch_iou_value,
+                    monitor,
+                    monitored_value,
+                    best_metric,
+                    best_epoch,
+                    epochs_without_improvement,
+                    patience,
                     sample_count,
                 )
+                if enabled and epochs_without_improvement >= patience:
+                    self.logger.info(
+                        "[train] early stopping triggered at epoch=%s best_epoch=%s best_%s=%.4f",
+                        epoch_index + 1,
+                        best_epoch,
+                        monitor,
+                        best_metric,
+                    )
+                    break
         finally:
             tracker.close()
 
@@ -188,14 +264,15 @@ class Trainer:
         )
 
         try:
-            if self.checkpoint_path.exists():
+            eval_checkpoint = self._resolve_eval_checkpoint()
+            if eval_checkpoint is not None:
                 try:
-                    metadata = model.load_checkpoint(self.checkpoint_path, map_location=self.device)
-                    self.logger.info("[eval] loaded checkpoint=%s metadata=%s", self.checkpoint_path, metadata)
+                    metadata = model.load_checkpoint(eval_checkpoint, map_location=self.device)
+                    self.logger.info("[eval] loaded checkpoint=%s metadata=%s", eval_checkpoint, metadata)
                 except RuntimeError as exc:
                     self.logger.warning(
                         "[eval] skipped incompatible checkpoint=%s error=%s",
-                        self.checkpoint_path,
+                        eval_checkpoint,
                         exc,
                     )
             else:
@@ -211,99 +288,43 @@ class Trainer:
             )
 
             model.eval()
-            total_loss = 0.0
-            total_iou = 0.0
-            total_correct = 0
-            sample_count = 0
-            all_predictions: list[dict[str, torch.Tensor]] = []
-            all_ground_truths: list[dict[str, torch.Tensor]] = []
-
             eval_config = self.config.get("eval", {})
-            conf_thresh = float(eval_config.get("conf_thresh", 0.25))
-            iou_thresh = float(eval_config.get("iou_thresh", 0.5))
-
-            with torch.no_grad():
-                profile_batch: dict[str, object] | None = None
-                for batch_index, batch in enumerate(val_loader):
-                    if batch_index >= max_batches:
-                        break
-
-                    raw_image = batch["raw_image"].to(self.device)
-                    enhanced_image = batch["enhanced_image"].to(self.device)
-                    if profile_batch is None:
-                        profile_batch = {
-                            "raw_image": raw_image[:1],
-                            "enhanced_image": enhanced_image[:1],
-                        }
-                    predictions = model(raw_image, enhanced_image)
-                    matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
-                    loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
-
-                    batch_size_value = int(matched_mask.sum().item())
-                    total_loss += float(loss_output["loss"].item()) * batch_size_value
-                    total_iou += self._mean_iou(loss_output["pred_boxes"], matched_boxes, matched_mask) * batch_size_value
-                    total_correct += self._count_class_matches(
-                        loss_output["predicted_class"],
-                        matched_classes,
-                        matched_mask,
-                    )
-                    sample_count += batch_size_value
-
-                    decoded = decode_predictions(
-                        predictions["logits"],
-                        predictions["pred_boxes"],
-                        background_class=self._background_class,
-                        conf_thresh=conf_thresh,
-                        iou_thresh=iou_thresh,
-                    )
-                    all_predictions.extend(decoded)
-                    all_ground_truths.extend(self._ground_truth_records(batch))
-
-            eval_loss = total_loss / max(sample_count, 1)
-            eval_acc = total_correct / max(sample_count, 1)
-            eval_iou = total_iou / max(sample_count, 1)
-            det_metrics = compute_detection_metrics(
-                all_predictions,
-                all_ground_truths,
-                num_classes=int(self.config.get("dataset", {}).get("num_classes", 4)),
+            metrics = self._evaluate_model(
+                model=model,
+                loss_fn=loss_fn,
+                val_loader=val_loader,
+                max_batches=max_batches,
+                conf_thresh=float(eval_config.get("conf_thresh", 0.25)),
+                iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
+                tracker=tracker,
+                tracker_step=1,
             )
-            complexity_metrics = self._complexity_metrics(model, profile_batch)
+            complexity_metrics = self._complexity_metrics(model, self._last_profile_batch)
             speed_metrics = self._speed_metrics(
                 model=model,
                 dataset=val_dataset,
-                conf_thresh=conf_thresh,
-                iou_thresh=iou_thresh,
+                conf_thresh=float(eval_config.get("conf_thresh", 0.25)),
+                iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
                 max_batches=min(max_batches, 10),
                 batch_size=min(int(self.config.get("train", {}).get("batch_size", 4)), len(val_dataset)),
             )
-            metrics = {
-                "loss": eval_loss,
-                "acc": eval_acc,
-                "box_iou": eval_iou,
-                **det_metrics,
-                **complexity_metrics,
-                **speed_metrics,
-            }
-            tracker.log_scalar("eval/loss", eval_loss, 1)
-            tracker.log_scalar("eval/acc", eval_acc, 1)
-            tracker.log_scalar("eval/box_iou", eval_iou, 1)
-            tracker.log_scalar("eval/map50", metrics["map50"], 1)
-            tracker.log_scalar("eval/map50_95", metrics["map50_95"], 1)
+            metrics.update(complexity_metrics)
+            metrics.update(speed_metrics)
             tracker.log_scalar("eval/params_m", metrics["params_m"], 1)
             tracker.log_scalar("eval/gflops", metrics["gflops"], 1)
             tracker.log_scalar("eval/fps", metrics["fps"], 1)
-            self._write_eval_artifacts(all_predictions, metrics)
+            self._write_eval_artifacts(self._last_predictions, metrics)
             self.logger.info(
                 "[eval] summary loss=%.4f acc=%.2f iou=%.2f map50=%.3f map50_95=%.3f params=%.3fM gflops=%.3f fps=%.2f samples=%s",
-                eval_loss,
-                eval_acc,
-                eval_iou,
+                metrics["loss"],
+                metrics["acc"],
+                metrics["box_iou"],
                 metrics["map50"],
                 metrics["map50_95"],
                 metrics["params_m"],
                 metrics["gflops"],
                 metrics["fps"],
-                sample_count,
+                self._last_eval_samples,
             )
             return metrics
         finally:
@@ -477,6 +498,102 @@ class Trainer:
         )
         self.metrics_path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
 
+    def _resolve_eval_checkpoint(self) -> Path | None:
+        eval_config = self.config.get("eval", {})
+        checkpoint_mode = str(eval_config.get("checkpoint", "best")).lower()
+        if checkpoint_mode == "latest":
+            return self.checkpoint_path if self.checkpoint_path.exists() else None
+        if self.best_checkpoint_path.exists():
+            return self.best_checkpoint_path
+        if self.checkpoint_path.exists():
+            return self.checkpoint_path
+        return None
+
+    def _evaluate_model(
+        self,
+        model: torch.nn.Module,
+        loss_fn: DetectionLoss,
+        val_loader: DataLoader,
+        max_batches: int,
+        conf_thresh: float,
+        iou_thresh: float,
+        tracker: ExperimentTracker | None = None,
+        tracker_step: int | None = None,
+    ) -> dict[str, float]:
+        total_loss = 0.0
+        total_iou = 0.0
+        total_correct = 0
+        sample_count = 0
+        all_predictions: list[dict[str, torch.Tensor]] = []
+        all_ground_truths: list[dict[str, torch.Tensor]] = []
+        profile_batch: dict[str, torch.Tensor] | None = None
+
+        model.eval()
+        with torch.no_grad():
+            for batch_index, batch in enumerate(val_loader):
+                if max_batches > 0 and batch_index >= max_batches:
+                    break
+
+                raw_image = batch["raw_image"].to(self.device)
+                enhanced_image = batch["enhanced_image"].to(self.device)
+                if profile_batch is None:
+                    profile_batch = {
+                        "raw_image": raw_image[:1],
+                        "enhanced_image": enhanced_image[:1],
+                    }
+                predictions = model(raw_image, enhanced_image)
+                matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
+                loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
+
+                batch_size_value = int(matched_mask.sum().item())
+                total_loss += float(loss_output["loss"].item()) * batch_size_value
+                total_iou += self._mean_iou(loss_output["pred_boxes"], matched_boxes, matched_mask) * batch_size_value
+                total_correct += self._count_class_matches(
+                    loss_output["predicted_class"],
+                    matched_classes,
+                    matched_mask,
+                )
+                sample_count += batch_size_value
+
+                decoded = decode_predictions(
+                    predictions["logits"],
+                    predictions["pred_boxes"],
+                    background_class=self._background_class,
+                    conf_thresh=conf_thresh,
+                    iou_thresh=iou_thresh,
+                )
+                all_predictions.extend(decoded)
+                all_ground_truths.extend(self._ground_truth_records(batch))
+
+        metrics = {
+            "loss": total_loss / max(sample_count, 1),
+            "acc": total_correct / max(sample_count, 1),
+            "box_iou": total_iou / max(sample_count, 1),
+        }
+        metrics.update(
+            compute_detection_metrics(
+                all_predictions,
+                all_ground_truths,
+                num_classes=int(self.config.get("dataset", {}).get("num_classes", 4)),
+            )
+        )
+        self._last_predictions = all_predictions
+        self._last_ground_truths = all_ground_truths
+        self._last_profile_batch = profile_batch
+        self._last_eval_samples = sample_count
+        if tracker is not None and tracker_step is not None:
+            tracker.log_scalar("eval/loss", metrics["loss"], tracker_step)
+            tracker.log_scalar("eval/acc", metrics["acc"], tracker_step)
+            tracker.log_scalar("eval/box_iou", metrics["box_iou"], tracker_step)
+            tracker.log_scalar("eval/map50", metrics["map50"], tracker_step)
+            tracker.log_scalar("eval/map50_95", metrics["map50_95"], tracker_step)
+        return metrics
+
+    def _is_improved(self, current: float, best: float, mode: str, min_delta: float) -> bool:
+        if mode == "max":
+            return current > best + min_delta
+        return current < best - min_delta
+
     def _complexity_metrics(
         self,
         model: torch.nn.Module,
@@ -566,7 +683,7 @@ class Trainer:
 
         with torch.no_grad():
             for batch_index, batch in enumerate(loader):
-                if batch_index >= max_batches:
+                if max_batches > 0 and batch_index >= max_batches:
                     break
                 raw_image = batch["raw_image"].to(self.device)
                 enhanced_image = batch["enhanced_image"].to(self.device)

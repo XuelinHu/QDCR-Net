@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{Main comparison between the baseline detector and QDCR-Net on the current first-wave datasets. Higher is better for Acc, Box IoU, mAP, Precision, and Recall. Lower is better for Loss.}
+\label{tab:main_comparison}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llccccccccc}
+\toprule
+Dataset & Model & Loss $\downarrow$ & Acc $\uparrow$ & Box IoU $\uparrow$ & mAP@0.5 $\uparrow$ & mAP@0.5:0.95 $\uparrow$ & Precision $\uparrow$ & Recall $\uparrow$ & Params (M) $\downarrow$ & GFLOPs $\downarrow$ \\
+\midrule
+UOv2 & Baseline & 1.4918 & 0.4277 & 0.0557 & 0.000037 & 0.000006 & 0.002167 & 0.003805 & 0.0079 & 0.0811 \\
+UOv2 & QDCR-Net & 1.4664 & 0.4954 & 0.0569 & 0.000047 & 0.000009 & 0.003007 & 0.004225 & 0.0183 & 0.1622 \\
+\midrule
+Brackish & Baseline & 0.8126 & 0.5530 & 0.0901 & 0.002369 & 0.000347 & 0.026050 & 0.009408 & 0.0079 & 0.0811 \\
+Brackish & QDCR-Net & 0.9393 & 0.3308 & 0.0996 & 0.003808 & 0.000557 & 0.057969 & 0.017177 & 0.0183 & 0.1623 \\
+\midrule
+RUOD & Baseline & 1.5091 & 0.3519 & 0.0778 & 0.001179 & 0.000154 & 0.011247 & 0.010821 & 0.0078 & 0.0811 \\
+RUOD & QDCR-Net & 1.5569 & 0.3825 & 0.0758 & 0.000640 & 0.000094 & 0.011988 & 0.011301 & 0.0183 & 0.1622 \\
+\bottomrule
+\end{tabular}
+\end{table*}
