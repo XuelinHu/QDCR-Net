@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# 使用 UTF-8 编写注释。
+# 该脚本顺序执行正式实验矩阵中的训练与评估任务。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,6 +12,7 @@ mkdir -p "$LOG_DIR"
 GPU_MEM_USED_THRESHOLD="${GPU_MEM_USED_THRESHOLD:-4500}"
 GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-180}"
 
+# 正式实验配置列表，按顺序逐个执行。
 CONFIGS=(
   "configs/formal/base_uov2_full.yaml"
   "configs/formal/qdcr_uov2_full.yaml"
@@ -28,6 +31,7 @@ log() {
 }
 
 wait_for_gpu() {
+  # 如果机器支持 nvidia-smi，则等待显存占用下降到阈值以下后再启动任务。
   if ! command -v nvidia-smi >/dev/null 2>&1; then
     return 0
   fi
@@ -45,6 +49,7 @@ wait_for_gpu() {
 }
 
 run_one() {
+  # 单个配置先训练再评估，并把日志分别落到自动化输出目录。
   local config_path="$1"
   local stem
   stem="$(basename "$config_path" .yaml)"
@@ -59,6 +64,7 @@ run_one() {
 }
 
 main() {
+  # 这里按数组顺序执行，方便在夜间无人值守时持续跑完整矩阵。
   log "formal matrix runner started"
   for config_path in "${CONFIGS[@]}"; do
     run_one "$config_path"

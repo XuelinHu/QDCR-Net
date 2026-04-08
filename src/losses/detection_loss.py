@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+"""检测任务损失函数。"""
+
 import torch
 from torch import nn
 
 
 class DetectionLoss(nn.Module):
-    """Classification + matched-box regression loss."""
+    """分类损失与匹配框回归损失的组合。"""
 
     def __init__(self, box_weight: float = 5.0) -> None:
         super().__init__()
@@ -18,6 +21,7 @@ class DetectionLoss(nn.Module):
         matched_boxes: torch.Tensor,
         matched_mask: torch.Tensor,
     ) -> dict[str, torch.Tensor]:
+        """根据匹配结果计算总损失，并返回训练时常用的中间量。"""
         logits = predictions["logits"]
         pred_boxes = predictions["pred_boxes"]
 
@@ -29,6 +33,7 @@ class DetectionLoss(nn.Module):
 
         valid_mask_expanded = matched_mask.unsqueeze(-1).float()
         raw_box_loss = self.box_loss(pred_boxes, matched_boxes)
+        # 只统计成功匹配到真实框的位置，避免背景 query 干扰框回归。
         box_loss = (raw_box_loss * valid_mask_expanded).sum() / valid_mask_expanded.sum().clamp(min=1.0)
         loss = classification_loss + self.box_weight * box_loss
         predicted_class = logits.argmax(dim=-1)

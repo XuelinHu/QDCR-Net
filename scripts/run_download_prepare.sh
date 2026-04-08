@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
+# 使用 UTF-8 编写注释。
+# 该脚本负责下载公开数据集、解压，并基于模板生成样例配置。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# 统一准备原始下载目录、解压目录、日志目录和生成配置目录。
 mkdir -p data/raw data/datasets/downloads data/logs configs/generated
 LOG="data/logs/download_prepare.log"
 
 log() {
+  # 所有步骤都写入同一个日志文件，便于断点排查。
   printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG"
 }
 
 download_extract_generate() {
+  # 针对单个数据集执行“下载 -> 解压 -> 生成 QDCR/Base 配置”的完整流水线。
   local name="$1"
   local url="$2"
   local qdcr_cfg="$3"
@@ -34,5 +39,6 @@ download_extract_generate() {
   log "Finished ${name}"
 }
 
+# 当前默认下载 Brackish 与 RUOD 两个公开数据集。
 download_extract_generate "Brackish" "https://ndownloader.figshare.com/files/53414546" "configs/generated/qdcr_brackish_sample.yaml" "configs/generated/base_brackish_sample.yaml"
 download_extract_generate "RUOD" "https://ndownloader.figshare.com/files/53414735" "configs/generated/qdcr_ruod_sample.yaml" "configs/generated/base_ruod_sample.yaml"

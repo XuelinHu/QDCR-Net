@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""训练器实现，负责训练、评估和实验产物写出。"""
+
 from dataclasses import dataclass
 import json
 from pathlib import Path
@@ -17,9 +20,12 @@ from src.utils import ExperimentTracker, get_logger
 
 @dataclass
 class Trainer:
+    """围绕配置驱动的最小训练/评估控制器。"""
+
     config: dict
 
     def __post_init__(self) -> None:
+        """解析实验路径、运行设备并设置随机种子。"""
         self.logger = get_logger("qdcr.trainer")
         experiment_config = self.config.get("experiment", {})
         self.output_dir = Path(experiment_config.get("output_dir", "outputs/checkpoints/qdcr_net_smoke"))
@@ -37,6 +43,7 @@ class Trainer:
         self._set_seed(int(experiment_config.get("seed", 42)))
 
     def fit(self) -> None:
+        """执行完整训练流程，并在每轮结束后做验证与早停判断。"""
         train_dataset, val_dataset = self._build_datasets()
         model = self._build_model().to(self.device)
         loss_fn = DetectionLoss().to(self.device)
@@ -55,6 +62,7 @@ class Trainer:
         monitor = str(early_stopping.get("monitor", "loss"))
         mode = str(early_stopping.get("mode", "min")).lower()
         enabled = bool(early_stopping.get("enabled", True))
+        # DataLoader 统一走同一个 collate_fn，兼容每张图目标数量不同的情况。
         train_loader = DataLoader(
             train_dataset,
             batch_size=max(batch_size, 1),
@@ -91,6 +99,7 @@ class Trainer:
         try:
             if self.checkpoint_path.exists():
                 try:
+                    # 若存在 latest checkpoint，则优先从最近训练进度继续。
                     metadata = model.load_checkpoint(
                         self.checkpoint_path,
                         optimizer=optimizer,
@@ -123,6 +132,7 @@ class Trainer:
                     raw_image = batch["raw_image"].to(self.device)
                     enhanced_image = batch["enhanced_image"].to(self.device)
                     predictions = model(raw_image, enhanced_image)
+                    # 先把固定 query 与真实目标对齐，再进入损失计算。
                     matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
 
                     optimizer.zero_grad(set_to_none=True)
@@ -141,6 +151,7 @@ class Trainer:
                     batch_loss_value = float(loss.item())
                     batch_acc_value = batch_correct / max(batch_size_value, 1)
 
+                    # 训练统计只按有效匹配目标聚合，避免背景 query 拉低可解释性。
                     epoch_loss += batch_loss_value * batch_size_value
                     epoch_box_iou += batch_iou * batch_size_value
                     epoch_correct += batch_correct
@@ -176,6 +187,7 @@ class Trainer:
                 tracker.log_scalar("train/epoch_loss", epoch_loss_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_acc", epoch_acc_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_box_iou", epoch_iou_value, epoch_index + 1)
+                # 每轮先保存 latest，便于异常中断后继续训练。
                 model.save_checkpoint(
                     self.checkpoint_path,
                     optimizer=optimizer,
@@ -208,6 +220,7 @@ class Trainer:
                     best_metric = monitored_value
                     best_epoch = epoch_index + 1
                     epochs_without_improvement = 0
+                    # 只有监控指标改善时才刷新 best checkpoint。
                     model.save_checkpoint(
                         self.best_checkpoint_path,
                         optimizer=optimizer,
@@ -249,6 +262,7 @@ class Trainer:
             tracker.close()
 
     def evaluate(self) -> dict[str, float]:
+        """加载 checkpoint 并输出评估指标、复杂度和推理速度。"""
         _, val_dataset = self._build_datasets()
         model = self._build_model().to(self.device)
         loss_fn = DetectionLoss().to(self.device)
@@ -267,6 +281,7 @@ class Trainer:
             eval_checkpoint = self._resolve_eval_checkpoint()
             if eval_checkpoint is not None:
                 try:
+                    # 默认优先评估 best checkpoint，没有时回退到 latest。
                     metadata = model.load_checkpoint(eval_checkpoint, map_location=self.device)
                     self.logger.info("[eval] loaded checkpoint=%s metadata=%s", eval_checkpoint, metadata)
                 except RuntimeError as exc:
@@ -299,6 +314,7 @@ class Trainer:
                 tracker=tracker,
                 tracker_step=1,
             )
+            # 额外补充参数量、GFLOPs 与 FPS，便于和论文表格对齐。
             complexity_metrics = self._complexity_metrics(model, self._last_profile_batch)
             speed_metrics = self._speed_metrics(
                 model=model,
@@ -332,9 +348,11 @@ class Trainer:
 
     @property
     def _background_class(self) -> int:
+        """背景类别索引固定放在真实类别之后。"""
         return int(self.config.get("dataset", {}).get("num_classes", 4))
 
     def _build_datasets(self) -> tuple[UnderwaterDetectionDataset, UnderwaterDetectionDataset]:
+        """根据配置构建训练集和验证集。"""
         dataset_config = self.config.get("dataset", {})
         common_args = {
             "num_classes": int(dataset_config.get("num_classes", 4)),
@@ -359,6 +377,7 @@ class Trainer:
         return train_dataset, val_dataset
 
     def _build_model(self) -> torch.nn.Module:
+        """按配置选择 QDCR-Net 或单分支基线模型。"""
         dataset_config = self.config.get("dataset", {})
         model_config = self.config.get("model", {})
         model_name = str(model_config.get("name", "qdcr_net")).lower()
@@ -370,6 +389,7 @@ class Trainer:
         )
 
     def _build_optimizer(self, model: torch.nn.Module) -> torch.optim.Optimizer:
+        """构建优化器，默认使用 AdamW。"""
         train_config = self.config.get("train", {})
         optimizer_name = str(train_config.get("optimizer", "adamw")).lower()
         learning_rate = float(train_config.get("lr", 1e-3))
@@ -379,6 +399,7 @@ class Trainer:
         return torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     def _derive_annotation_root(self, image_root: Path | None) -> Path | None:
+        """从图片目录推断 labels 目录位置。"""
         if image_root is None:
             return None
         if image_root.name == "images":
@@ -386,15 +407,18 @@ class Trainer:
         return image_root / "labels"
 
     def _as_path(self, value: str | None) -> Path | None:
+        """把配置中的可选字符串路径转换为 Path。"""
         return None if value is None else Path(value)
 
     def _set_seed(self, seed: int) -> None:
+        """设置 CPU/CUDA 随机种子，减少实验抖动。"""
         random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def _collate_batch(self, batch: list[dict]) -> dict[str, object]:
+        """自定义拼批逻辑，保留变长目标框列表。"""
         return {
             "sample_id": [sample["sample_id"] for sample in batch],
             "raw_image": torch.stack([sample["raw_image"] for sample in batch], dim=0),
@@ -409,6 +433,7 @@ class Trainer:
         predictions: dict[str, torch.Tensor],
         batch: dict[str, object],
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """对一个 batch 中的每张图分别执行贪心匹配。"""
         logits = predictions["logits"]
         pred_boxes = predictions["pred_boxes"]
         gt_classes_list: list[torch.Tensor] = batch["gt_classes"]  # type: ignore[assignment]
@@ -443,6 +468,7 @@ class Trainer:
         target_boxes: torch.Tensor,
         valid_mask: torch.Tensor,
     ) -> float:
+        """只在有效匹配位置上计算平均 IoU。"""
         iou = pairwise_iou_xywh(
             pred_boxes[valid_mask],
             target_boxes[valid_mask],
@@ -458,6 +484,7 @@ class Trainer:
         targets: torch.Tensor,
         valid_mask: torch.Tensor,
     ) -> int:
+        """统计有效匹配目标上的类别预测正确数。"""
         valid_predictions = predicted_class[valid_mask]
         valid_targets = targets[valid_mask]
         if valid_targets.numel() == 0:
@@ -465,6 +492,7 @@ class Trainer:
         return int((valid_predictions == valid_targets).sum().item())
 
     def _ground_truth_records(self, batch: dict[str, object]) -> list[dict[str, torch.Tensor]]:
+        """把 batch 中的 GT 整理成评估函数需要的记录格式。"""
         gt_classes_list: list[torch.Tensor] = batch["gt_classes"]  # type: ignore[assignment]
         gt_boxes_list: list[torch.Tensor] = batch["gt_boxes"]  # type: ignore[assignment]
         return [
@@ -480,6 +508,7 @@ class Trainer:
         predictions: list[dict[str, torch.Tensor]],
         metrics: dict[str, float],
     ) -> None:
+        """将预测结果和指标写出为 JSON 文件。"""
         self.output_dir.mkdir(parents=True, exist_ok=True)
         serializable_predictions = []
         for image_index, prediction in enumerate(predictions):
@@ -499,6 +528,7 @@ class Trainer:
         self.metrics_path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
 
     def _resolve_eval_checkpoint(self) -> Path | None:
+        """根据评估配置决定优先使用 best 还是 latest checkpoint。"""
         eval_config = self.config.get("eval", {})
         checkpoint_mode = str(eval_config.get("checkpoint", "best")).lower()
         if checkpoint_mode == "latest":
@@ -520,6 +550,7 @@ class Trainer:
         tracker: ExperimentTracker | None = None,
         tracker_step: int | None = None,
     ) -> dict[str, float]:
+        """在验证集上运行模型并汇总核心指标。"""
         total_loss = 0.0
         total_iou = 0.0
         total_correct = 0
@@ -537,6 +568,7 @@ class Trainer:
                 raw_image = batch["raw_image"].to(self.device)
                 enhanced_image = batch["enhanced_image"].to(self.device)
                 if profile_batch is None:
+                    # 保留首个 batch 的一个样本，用于后续复杂度估算。
                     profile_batch = {
                         "raw_image": raw_image[:1],
                         "enhanced_image": enhanced_image[:1],
@@ -565,6 +597,7 @@ class Trainer:
                 all_predictions.extend(decoded)
                 all_ground_truths.extend(self._ground_truth_records(batch))
 
+        # 基础损失/精度指标和检测指标最后统一合并，便于日志与 JSON 复用。
         metrics = {
             "loss": total_loss / max(sample_count, 1),
             "acc": total_correct / max(sample_count, 1),
@@ -590,6 +623,7 @@ class Trainer:
         return metrics
 
     def _is_improved(self, current: float, best: float, mode: str, min_delta: float) -> bool:
+        """判断当前监控指标是否达到“有效改善”。"""
         if mode == "max":
             return current > best + min_delta
         return current < best - min_delta
@@ -599,6 +633,7 @@ class Trainer:
         model: torch.nn.Module,
         profile_batch: dict[str, torch.Tensor] | None,
     ) -> dict[str, float]:
+        """统计参数量，并在可行时估算 GFLOPs。"""
         params = float(sum(parameter.numel() for parameter in model.parameters()))
         gflops = 0.0
         if profile_batch is not None:
@@ -618,6 +653,7 @@ class Trainer:
         raw_image: torch.Tensor,
         enhanced_image: torch.Tensor,
     ) -> float:
+        """通过 forward hook 粗略估算卷积和线性层 FLOPs。"""
         total_flops = 0.0
         handles: list[torch.utils.hooks.RemovableHandle] = []
 
@@ -664,6 +700,7 @@ class Trainer:
         max_batches: int,
         batch_size: int,
     ) -> dict[str, float]:
+        """估算推理 FPS，并跳过首个 batch 作为预热。"""
         if len(dataset) == 0 or max_batches <= 0:
             return {"fps": 0.0}
 
@@ -702,6 +739,7 @@ class Trainer:
                     torch.cuda.synchronize(self.device)
                 batch_elapsed = time.perf_counter() - batch_start
                 if batch_index == 0:
+                    # 首个 batch 常常包含额外的初始化开销，不纳入速度统计。
                     continue
                 start_time += batch_elapsed
                 timed_images += int(raw_image.size(0))

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# 使用 UTF-8 编写注释。
+# 该脚本用于夜间续跑样例实验，并在 RUOD 压缩包准备好后自动生成配置。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,10 +19,12 @@ timestamp() {
 }
 
 log() {
+  # 所有信息统一追加到标准输出，并由 tee 写入对应日志。
   printf '[%s] %s\n' "$(timestamp)" "$*"
 }
 
 run_logged() {
+  # 包装任意命令，自动记录任务名和输出日志。
   local name="$1"
   shift
   log "running: $name"
@@ -28,6 +32,7 @@ run_logged() {
 }
 
 wait_for_gpu() {
+  # 同时检查 GPU 利用率与显存占用，避免和其他任务抢卡。
   if ! command -v nvidia-smi >/dev/null 2>&1; then
     log "nvidia-smi not found, skip GPU wait"
     return 0
@@ -52,6 +57,7 @@ wait_for_gpu() {
 }
 
 wait_for_valid_zip() {
+  # 持续轮询 RUOD 压缩包，直到文件存在且 unzip 校验通过。
   local zip_path="$1"
   while true; do
     if [[ -s "$zip_path" ]] && unzip -tqq "$zip_path" >/dev/null 2>&1; then
@@ -64,6 +70,7 @@ wait_for_valid_zip() {
 }
 
 prepare_ruod() {
+  # RUOD 数据集到位后，自动解压并生成 QDCR/Base 两套样例配置。
   local zip_path="$ROOT/data/raw/RUOD.zip"
   local extract_dir="$ROOT/data/datasets/downloads/RUOD"
 
@@ -104,6 +111,7 @@ prepare_ruod() {
 }
 
 run_sample_suite() {
+  # 样例实验统一遵循“训练 -> 评估”顺序。
   local config_path="$1"
   local stem="$2"
   wait_for_gpu
@@ -113,6 +121,7 @@ run_sample_suite() {
 }
 
 main() {
+  # 先继续现有 Brackish 样例，再在 RUOD 数据准备好后补跑 RUOD。
   log "overnight continuation started"
 
   run_sample_suite "configs/generated/qdcr_brackish_sample.yaml" "qdcr_brackish_sample"

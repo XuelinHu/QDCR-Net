@@ -1,1 +1,2 @@
-"""Project source package for QDCR-Net."""
+# -*- coding: utf-8 -*-
+"""QDCR-Net 源码主包。"""

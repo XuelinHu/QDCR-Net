@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
+"""检测任务中的匹配、解码和指标计算工具。"""
+
 import torch
 from torchvision.ops import nms
 
 
 def pairwise_iou_xywh(boxes_a: torch.Tensor, boxes_b: torch.Tensor) -> torch.Tensor:
+    """计算两组 xywh 归一化框之间的两两 IoU。"""
     if boxes_a.numel() == 0 or boxes_b.numel() == 0:
         return torch.zeros((boxes_a.size(0), boxes_b.size(0)), dtype=boxes_a.dtype, device=boxes_a.device)
 
@@ -27,6 +31,7 @@ def pairwise_iou_xywh(boxes_a: torch.Tensor, boxes_b: torch.Tensor) -> torch.Ten
 
 
 def xywh_to_xyxy(boxes: torch.Tensor) -> torch.Tensor:
+    """把中心点格式边界框转换为角点格式。"""
     center_x = boxes[..., 0]
     center_y = boxes[..., 1]
     width = boxes[..., 2]
@@ -52,6 +57,7 @@ def greedy_match(
     l1_weight: float = 3.0,
     iou_weight: float = 3.0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """基于分类、L1 与 IoU 混合代价做贪心匹配。"""
     num_queries = logits.size(0)
     matched_classes = torch.full(
         (num_queries,),
@@ -71,6 +77,7 @@ def greedy_match(
     cls_cost = -probabilities[:, gt_classes]
     total_cost = cls_weight * cls_cost + l1_weight * l1_matrix + iou_weight * (1.0 - iou_matrix)
 
+    # 展平成候选对后排序，实现一个简单但足够稳定的匹配过程。
     candidate_pairs: list[tuple[float, int, int]] = []
     for pred_index in range(num_queries):
         for gt_index in range(gt_classes.size(0)):
@@ -98,6 +105,7 @@ def decode_predictions(
     conf_thresh: float,
     iou_thresh: float,
 ) -> list[dict[str, torch.Tensor]]:
+    """把模型输出解码为按图片组织的检测结果，并做按类 NMS。"""
     batch_detections: list[dict[str, torch.Tensor]] = []
     probabilities = logits.softmax(dim=-1)
     scores, classes = probabilities[..., :-1].max(dim=-1)
@@ -123,6 +131,7 @@ def decode_predictions(
         kept_indices = []
         box_xyxy = xywh_to_xyxy(box)
         for class_id in cls.unique():
+            # 按类别分别执行 NMS，避免不同类别之间相互抑制。
             class_mask = cls == class_id
             class_indices = torch.nonzero(class_mask, as_tuple=False).squeeze(1)
             selected = nms(box_xyxy[class_mask], score[class_mask], iou_thresh)
@@ -149,6 +158,7 @@ def compute_detection_metrics(
     ground_truths: list[dict[str, torch.Tensor]],
     num_classes: int,
 ) -> dict[str, float]:
+    """计算 mAP、precision、recall 等聚合指标。"""
     ap50_per_class = []
     ap5095_per_class = []
     precisions = []
@@ -179,6 +189,7 @@ def _average_precision(
     class_id: int,
     iou_threshold: float,
 ) -> float:
+    """针对单一类别和单一 IoU 阈值计算 AP。"""
     scored_predictions = []
     total_ground_truth = 0
     gt_lookup: dict[int, dict[str, torch.Tensor]] = {}
@@ -229,6 +240,7 @@ def _average_precision(
 
     recalls = torch.cat([torch.tensor([0.0]), recalls, torch.tensor([1.0])])
     precisions = torch.cat([torch.tensor([1.0]), precisions, torch.tensor([0.0])])
+    # 从后向前做 precision envelope，得到标准 PR 曲线面积。
     for index in range(precisions.numel() - 2, -1, -1):
         precisions[index] = torch.maximum(precisions[index], precisions[index + 1])
 
@@ -242,6 +254,7 @@ def _precision_recall(
     class_id: int,
     iou_threshold: float,
 ) -> tuple[float, float]:
+    """在给定 IoU 阈值下计算单类别 precision 与 recall。"""
     scored_predictions = []
     total_ground_truth = 0
     gt_lookup: dict[int, dict[str, torch.Tensor]] = {}

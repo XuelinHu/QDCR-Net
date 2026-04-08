@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""根据数据集目录自动生成样例实验配置。"""
+
 import argparse
 from pathlib import Path
 import sys
@@ -9,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """解析配置生成脚本参数。"""
     parser = argparse.ArgumentParser(description="Generate a sample experiment config from a dataset root.")
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--template", type=Path, required=True)
@@ -23,6 +27,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def find_dir(root: Path, split_names: list[str], leaf_names: set[str]) -> Path | None:
+    """在数据集目录里搜索 train/val 对应的图片目录。"""
     for path in root.rglob("*"):
         if not path.is_dir():
             continue
@@ -35,6 +40,7 @@ def find_dir(root: Path, split_names: list[str], leaf_names: set[str]) -> Path |
 
 
 def main() -> None:
+    """读取模板后按数据集结构填充实验配置。"""
     args = parse_args()
     dataset_root = args.dataset_root.resolve()
     template = yaml.safe_load(args.template.read_text(encoding="utf-8"))
@@ -52,6 +58,7 @@ def main() -> None:
     if train_images is None:
         raise SystemExit(f"Could not find train/images under {dataset_root}")
     if val_images is None:
+        # 没有单独验证集时退化为复用训练集，便于快速连通流程。
         val_images = train_images
 
     cfg = template
