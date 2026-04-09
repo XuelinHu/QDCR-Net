@@ -2,6 +2,7 @@
 """评估入口脚本。"""
 
 import argparse
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -11,7 +12,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.engine.trainer import Trainer
+from src.utils import get_logger
 from src.utils.config import load_config
+from src.utils.experiment_notify import send_experiment_notification
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,10 +31,38 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     """加载配置并执行评估。"""
+    logger = get_logger("qdcr.eval")
     args = parse_args()
     config = load_config(args.config)
     trainer = Trainer(config)
-    trainer.evaluate()
+    start_time = datetime.now()
+    try:
+        metrics = trainer.evaluate()
+        end_time = datetime.now()
+        send_experiment_notification(
+            config=config,
+            project_root=ROOT,
+            trainer=trainer,
+            start_time=start_time,
+            end_time=end_time,
+            success=True,
+            stage="评估",
+            metrics=metrics,
+        )
+    except Exception as exc:
+        end_time = datetime.now()
+        logger.exception("[eval] evaluation failed")
+        send_experiment_notification(
+            config=config,
+            project_root=ROOT,
+            trainer=trainer,
+            start_time=start_time,
+            end_time=end_time,
+            success=False,
+            stage="评估",
+            error=exc,
+        )
+        raise
 
 
 if __name__ == "__main__":

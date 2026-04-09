@@ -233,7 +233,7 @@ bash scripts/continue_overnight.sh
 - 训练器会从所选 YAML 配置里读取 `dataset.train_root`、`dataset.val_root` 和 `experiment.output_dir`。
 - 如果默认数据路径下没有真实数据，`src/datasets/underwater_detection.py` 会自动退回到合成样本。
 - checkpoint 快照写入 `outputs/checkpoints/<experiment>/`。
-- 标量日志写入 `runs/<experiment>/scalars.tsv`，如果环境可用也会同步到 TensorBoard。
+- TensorBoard 日志统一写入 `/ds1/runs/<project>/`，每次启动会自动创建独立实验子目录，目录内同时保留 `scalars.tsv` 和 event 文件。
 - 正式全量实验统一使用 `configs/formal/` 下的配置文件。
 
 ## 建议阅读顺序

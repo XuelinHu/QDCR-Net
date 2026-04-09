@@ -232,7 +232,7 @@ Generated sample configs are written here by scripts:
 - The trainer reads dataset roots from the selected YAML config file.
 - If no real dataset is found, `src/datasets/underwater_detection.py` falls back to synthetic samples.
 - Checkpoint snapshots are written inside the `experiment.output_dir` path from the config.
-- TensorBoard-compatible scalar logs are written inside the `experiment.runs_dir` path from the config.
+- TensorBoard logs are written under `/ds1/runs/<project>/`, and each launch gets an independent run subdirectory containing `scalars.tsv` plus event files.
 - Formal full-data runs use configs under `configs/formal/`.
 
 ## Recommended reading order

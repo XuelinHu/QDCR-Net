@@ -2,6 +2,7 @@
 """评估并打印 mAP 指标的入口脚本。"""
 
 import argparse
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -11,7 +12,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.engine.trainer import Trainer
+from src.utils import get_logger
 from src.utils.config import load_config
+from src.utils.experiment_notify import send_experiment_notification
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,13 +31,41 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     """运行评估并将指标打印到标准输出。"""
+    logger = get_logger("qdcr.eval_map")
     args = parse_args()
     config = load_config(args.config)
     trainer = Trainer(config)
-    metrics = trainer.evaluate()
-    print("Evaluation metrics:")
-    for key, value in metrics.items():
-        print(f"  {key}: {value:.6f}")
+    start_time = datetime.now()
+    try:
+        metrics = trainer.evaluate()
+        end_time = datetime.now()
+        print("Evaluation metrics:")
+        for key, value in metrics.items():
+            print(f"  {key}: {value:.6f}")
+        send_experiment_notification(
+            config=config,
+            project_root=ROOT,
+            trainer=trainer,
+            start_time=start_time,
+            end_time=end_time,
+            success=True,
+            stage="评估",
+            metrics=metrics,
+        )
+    except Exception as exc:
+        end_time = datetime.now()
+        logger.exception("[eval_map] evaluation failed")
+        send_experiment_notification(
+            config=config,
+            project_root=ROOT,
+            trainer=trainer,
+            start_time=start_time,
+            end_time=end_time,
+            success=False,
+            stage="评估",
+            error=exc,
+        )
+        raise
 
 
 if __name__ == "__main__":

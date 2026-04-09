@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import random
 import time
+from typing import Any
 
 import torch
 from torch import nn
@@ -29,7 +30,6 @@ class Trainer:
         self.logger = get_logger("qdcr.trainer")
         experiment_config = self.config.get("experiment", {})
         self.output_dir = Path(experiment_config.get("output_dir", "outputs/checkpoints/qdcr_net_smoke"))
-        self.run_dir = Path(experiment_config.get("runs_dir", f"runs/{experiment_config.get('name', 'default')}"))
         self.checkpoint_path = self.output_dir / "latest.pt"
         self.best_checkpoint_path = self.output_dir / "best.pt"
         self.prediction_path = self.output_dir / "predictions.json"
@@ -40,6 +40,8 @@ class Trainer:
                 "cuda" if torch.cuda.is_available() else "cpu",
             )
         )
+        self.run_dir: Path | None = None
+        self.last_fit_summary: dict[str, Any] | None = None
         self._set_seed(int(experiment_config.get("seed", 42)))
 
     def fit(self) -> None:
@@ -51,7 +53,8 @@ class Trainer:
         eval_config = self.config.get("eval", {})
         early_stopping = train_config.get("early_stopping", {})
         optimizer = self._build_optimizer(model)
-        tracker = ExperimentTracker(self.run_dir)
+        tracker = ExperimentTracker(self.config)
+        self.run_dir = tracker.run_dir
         batch_size = min(int(train_config.get("batch_size", 4)), len(train_dataset))
         eval_batch_size = min(int(train_config.get("batch_size", 4)), len(val_dataset))
         max_batches = int(train_config.get("max_batches_per_epoch", 2))
@@ -80,6 +83,7 @@ class Trainer:
         best_metric = float("inf") if mode == "min" else float("-inf")
         epochs_without_improvement = 0
         best_epoch = 0
+        final_val_metrics: dict[str, float] | None = None
 
         self.logger.info(
             "[train] experiment=%s dataset_size=%s batch_size=%s epochs=%s max_batches=%s device=%s early_stopping=%s monitor=%s mode=%s patience=%s min_delta=%.6f",
@@ -95,8 +99,10 @@ class Trainer:
             patience,
             min_delta,
         )
+        self.logger.info("[train] tensorboard_log_dir=%s", self.run_dir)
 
         try:
+            self._log_hparams(tracker)
             if self.checkpoint_path.exists():
                 try:
                     # 若存在 latest checkpoint，则优先从最近训练进度继续。
@@ -131,6 +137,8 @@ class Trainer:
 
                     raw_image = batch["raw_image"].to(self.device)
                     enhanced_image = batch["enhanced_image"].to(self.device)
+                    if global_step == 0:
+                        self._try_log_graph(tracker, model, raw_image, enhanced_image)
                     predictions = model(raw_image, enhanced_image)
                     # 先把固定 query 与真实目标对齐，再进入损失计算。
                     matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
@@ -158,7 +166,8 @@ class Trainer:
                     sample_count += batch_size_value
                     global_step += 1
 
-                    tracker.log_scalar("train/batch_loss", batch_loss_value, global_step)
+                    tracker.log_scalar("train/loss_step", batch_loss_value, global_step)
+                    tracker.log_scalar("train/lr", self._current_lr(optimizer), global_step)
                     tracker.log_scalar("train/batch_acc", batch_acc_value, global_step)
                     tracker.log_scalar("train/batch_box_iou", batch_iou, global_step)
                     tracker.log_scalar(
@@ -184,9 +193,10 @@ class Trainer:
                 epoch_loss_value = epoch_loss / max(sample_count, 1)
                 epoch_acc_value = epoch_correct / max(sample_count, 1)
                 epoch_iou_value = epoch_box_iou / max(sample_count, 1)
-                tracker.log_scalar("train/epoch_loss", epoch_loss_value, epoch_index + 1)
+                tracker.log_scalar("train/loss_epoch", epoch_loss_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_acc", epoch_acc_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_box_iou", epoch_iou_value, epoch_index + 1)
+                tracker.log_parameter_histograms(model.named_parameters(), epoch_index + 1)
                 # 每轮先保存 latest，便于异常中断后继续训练。
                 model.save_checkpoint(
                     self.checkpoint_path,
@@ -207,9 +217,12 @@ class Trainer:
                     iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
                     tracker=tracker,
                     tracker_step=epoch_index + 1,
+                    metric_prefix="val",
                 )
+                final_val_metrics = val_metrics
                 monitored_value = float(val_metrics[monitor])
                 tracker.log_scalar(f"train/early_stop_{monitor}", monitored_value, epoch_index + 1)
+                tracker.flush()
                 improved = self._is_improved(
                     current=monitored_value,
                     best=best_metric,
@@ -258,6 +271,18 @@ class Trainer:
                         best_metric,
                     )
                     break
+            if final_val_metrics is not None:
+                self._log_hparams(tracker, final_val_metrics, prefix="val")
+                self.last_fit_summary = {
+                    "best_epoch": best_epoch,
+                    "best_metric": best_metric,
+                    "monitor": monitor,
+                    "last_val_metrics": final_val_metrics,
+                    "run_dir": str(self.run_dir) if self.run_dir is not None else None,
+                    "checkpoint_path": str(self.checkpoint_path),
+                    "best_checkpoint_path": str(self.best_checkpoint_path),
+                }
+                return self.last_fit_summary
         finally:
             tracker.close()
 
@@ -266,7 +291,8 @@ class Trainer:
         _, val_dataset = self._build_datasets()
         model = self._build_model().to(self.device)
         loss_fn = DetectionLoss().to(self.device)
-        tracker = ExperimentTracker(self.run_dir)
+        tracker = ExperimentTracker(self.config)
+        self.run_dir = tracker.run_dir
         batch_size = min(int(self.config.get("train", {}).get("batch_size", 4)), len(val_dataset))
         max_batches = int(self.config.get("eval", {}).get("max_batches", 2))
         val_loader = DataLoader(
@@ -301,6 +327,7 @@ class Trainer:
                 max_batches,
                 self.device,
             )
+            self.logger.info("[eval] tensorboard_log_dir=%s", self.run_dir)
 
             model.eval()
             eval_config = self.config.get("eval", {})
@@ -313,6 +340,7 @@ class Trainer:
                 iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
                 tracker=tracker,
                 tracker_step=1,
+                metric_prefix="eval",
             )
             # 额外补充参数量、GFLOPs 与 FPS，便于和论文表格对齐。
             complexity_metrics = self._complexity_metrics(model, self._last_profile_batch)
@@ -329,6 +357,7 @@ class Trainer:
             tracker.log_scalar("eval/params_m", metrics["params_m"], 1)
             tracker.log_scalar("eval/gflops", metrics["gflops"], 1)
             tracker.log_scalar("eval/fps", metrics["fps"], 1)
+            self._log_hparams(tracker, metrics, prefix="eval")
             self._write_eval_artifacts(self._last_predictions, metrics)
             self.logger.info(
                 "[eval] summary loss=%.4f acc=%.2f iou=%.2f map50=%.3f map50_95=%.3f params=%.3fM gflops=%.3f fps=%.2f samples=%s",
@@ -549,6 +578,7 @@ class Trainer:
         iou_thresh: float,
         tracker: ExperimentTracker | None = None,
         tracker_step: int | None = None,
+        metric_prefix: str = "val",
     ) -> dict[str, float]:
         """在验证集上运行模型并汇总核心指标。"""
         total_loss = 0.0
@@ -615,12 +645,101 @@ class Trainer:
         self._last_profile_batch = profile_batch
         self._last_eval_samples = sample_count
         if tracker is not None and tracker_step is not None:
-            tracker.log_scalar("eval/loss", metrics["loss"], tracker_step)
-            tracker.log_scalar("eval/acc", metrics["acc"], tracker_step)
-            tracker.log_scalar("eval/box_iou", metrics["box_iou"], tracker_step)
-            tracker.log_scalar("eval/map50", metrics["map50"], tracker_step)
-            tracker.log_scalar("eval/map50_95", metrics["map50_95"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/loss", metrics["loss"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/acc", metrics["acc"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/box_iou", metrics["box_iou"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/mAP", metrics["map50"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/mAP50_95", metrics["map50_95"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/precision", metrics["precision"], tracker_step)
+            tracker.log_scalar(f"{metric_prefix}/recall", metrics["recall"], tracker_step)
         return metrics
+
+    def _log_hparams(
+        self,
+        tracker: ExperimentTracker,
+        metrics: dict[str, float] | None = None,
+        prefix: str = "hparams",
+    ) -> None:
+        """把关键配置写入 TensorBoard HParams 面板。"""
+        payload = self._hparams_payload()
+        if metrics is None:
+            tracker.log_hparams(payload)
+            return
+        summary_metrics = {
+            f"{prefix}/loss": float(metrics.get("loss", 0.0)),
+            f"{prefix}/acc": float(metrics.get("acc", 0.0)),
+        }
+        if "map50" in metrics:
+            summary_metrics[f"{prefix}/mAP"] = float(metrics["map50"])
+        if "precision" in metrics:
+            summary_metrics[f"{prefix}/precision"] = float(metrics["precision"])
+        if "recall" in metrics:
+            summary_metrics[f"{prefix}/recall"] = float(metrics["recall"])
+        tracker.log_hparams(payload, summary_metrics)
+
+    def _hparams_payload(self) -> dict[str, Any]:
+        experiment_config = self.config.get("experiment", {})
+        dataset_config = self.config.get("dataset", {})
+        model_config = self.config.get("model", {})
+        train_config = self.config.get("train", {})
+        eval_config = self.config.get("eval", {})
+        early_stopping = train_config.get("early_stopping", {})
+        return {
+            "experiment": experiment_config.get("name", "unknown"),
+            "model": model_config.get("name", "unknown"),
+            "dataset": self._dataset_name(),
+            "batch_size": int(train_config.get("batch_size", 4)),
+            "learning_rate": float(train_config.get("lr", 1e-3)),
+            "epochs": int(train_config.get("epochs", 1)),
+            "optimizer": train_config.get("optimizer", "adamw"),
+            "scheduler": train_config.get("scheduler", "none"),
+            "seed": int(experiment_config.get("seed", 42)),
+            "device": str(self.device),
+            "weight_decay": float(train_config.get("weight_decay", 0.0)),
+            "image_size": int(dataset_config.get("image_size", 128)),
+            "num_queries": int(model_config.get("num_queries", dataset_config.get("max_objects", 8))),
+            "conf_thresh": float(eval_config.get("conf_thresh", 0.25)),
+            "iou_thresh": float(eval_config.get("iou_thresh", 0.5)),
+            "early_stop_monitor": early_stopping.get("monitor", "loss"),
+        }
+
+    def _dataset_name(self) -> str:
+        dataset_config = self.config.get("dataset", {})
+        dataset_name = dataset_config.get("name")
+        if dataset_name:
+            return str(dataset_name)
+        for key in ("train_root", "val_root"):
+            path = dataset_config.get(key)
+            if not path:
+                continue
+            parts = Path(path).parts
+            for marker in ("train", "valid", "val"):
+                if marker in parts:
+                    index = parts.index(marker)
+                    if index > 0:
+                        return parts[index - 1]
+            if len(parts) >= 2:
+                return parts[-2]
+        return "dataset"
+
+    def _current_lr(self, optimizer: torch.optim.Optimizer) -> float:
+        """读取当前优化器学习率。"""
+        if not optimizer.param_groups:
+            return 0.0
+        return float(optimizer.param_groups[0].get("lr", 0.0))
+
+    def _try_log_graph(
+        self,
+        tracker: ExperimentTracker,
+        model: torch.nn.Module,
+        raw_image: torch.Tensor,
+        enhanced_image: torch.Tensor,
+    ) -> None:
+        """在 TensorBoard 支持且图可追踪时记录模型结构。"""
+        try:
+            tracker.log_model_graph(model, (raw_image[:1], enhanced_image[:1]))
+        except Exception as exc:
+            self.logger.warning("[train] skipped tensorboard graph export error=%s", exc)
 
     def _is_improved(self, current: float, best: float, mode: str, min_delta: float) -> bool:
         """判断当前监控指标是否达到“有效改善”。"""
