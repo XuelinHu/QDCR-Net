@@ -1,0 +1,30 @@
+experiment:
+  name: rtdetr_uov2_full
+  seed: 42
+  output_dir: outputs/checkpoints/rtdetr_uov2_full
+  runs_dir: runs/rtdetr_uov2_full
+  device: cuda
+dataset:
+  name: uov2
+  train_root: data/datasets/downloads/UOv2/train/images
+  val_root: data/datasets/downloads/UOv2/valid/images
+  enhanced_root: data/datasets/downloads/UOv2/train/images
+  num_classes: 5
+  synthetic_size: 0
+  max_objects: 32
+  class_names: [echinus, holothurian, scallop, starfish, waterweeds]
+  image_size: 640
+  workers: 4
+model:
+  name: rtdetr
+  weights: rtdetr-l.pt
+train:
+  epochs: 100
+  batch_size: 8
+  lr: 0.001
+  weight_decay: 0.0005
+  early_stopping: {patience: 20}
+eval:
+  split: val
+  conf_thresh: 0.25
+  iou_thresh: 0.5

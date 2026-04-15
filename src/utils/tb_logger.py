@@ -21,22 +21,14 @@ class TensorBoardLogger:
     def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
         self.project_root = Path(__file__).resolve().parents[2]
-        self.project_name = self._project_name()
         self.run_dir = self._build_run_dir()
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.hparams_path = self.run_dir / "hparams.json"
         self.writer = SummaryWriter(log_dir=str(self.run_dir)) if SummaryWriter is not None else None
         print(f"TensorBoard log dir: {self.run_dir}")
 
-    def _project_name(self) -> str:
-        experiment_config = self.config.get("experiment", {})
-        project_name = experiment_config.get("project_name")
-        if project_name:
-            return self._sanitize(str(project_name))
-        return self._sanitize(self.project_root.name or "default_project")
-
     def _build_run_dir(self) -> Path:
-        root_dir = Path("/ds1/runs") / self.project_name
+        root_dir = self.project_root / "runs"
         root_dir.mkdir(parents=True, exist_ok=True)
         run_name = self._run_name()
         run_dir = root_dir / run_name

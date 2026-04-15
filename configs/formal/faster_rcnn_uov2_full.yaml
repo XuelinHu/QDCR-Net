@@ -1,0 +1,29 @@
+experiment:
+  name: faster_rcnn_uov2_full
+  seed: 42
+  output_dir: outputs/checkpoints/faster_rcnn_uov2_full
+  runs_dir: runs/faster_rcnn_uov2_full
+  device: cuda
+dataset:
+  name: uov2
+  train_root: data/datasets/downloads/UOv2/train/images
+  val_root: data/datasets/downloads/UOv2/valid/images
+  enhanced_root: data/datasets/downloads/UOv2/train/images
+  num_classes: 5
+  synthetic_size: 0
+  max_objects: 32
+  class_names: [echinus, holothurian, scallop, starfish, waterweeds]
+  image_size: 640
+  workers: 4
+model:
+  name: faster_rcnn
+train:
+  epochs: 20
+  batch_size: 2
+  max_batches_per_epoch: 0
+  lr: 0.005
+  weight_decay: 0.0005
+eval:
+  split: val
+  conf_thresh: 0.25
+  iou_thresh: 0.5

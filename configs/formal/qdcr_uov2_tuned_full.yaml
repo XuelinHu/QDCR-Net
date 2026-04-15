@@ -1,0 +1,54 @@
+experiment:
+  name: qdcr_uov2_tuned_full
+  seed: 42
+  output_dir: outputs/checkpoints/qdcr_uov2_tuned_full
+  runs_dir: runs/qdcr_uov2_tuned_full
+  device: cuda
+
+dataset:
+  name: uov2
+  train_root: data/datasets/downloads/UOv2/train/images
+  val_root: data/datasets/downloads/UOv2/valid/images
+  enhanced_root: data/datasets/downloads/UOv2/train/images
+  num_classes: 5
+  synthetic_size: 0
+  max_objects: 16
+  class_names:
+    - echinus
+    - holothurian
+    - scallop
+    - starfish
+    - waterweeds
+  image_size: 640
+  workers: 4
+
+model:
+  name: qdcr_net
+  feature_dim: 64
+  num_queries: 16
+  backbone: dual_branch
+  quality_aware: true
+  cross_residual_stages:
+    - stage2
+    - stage3
+  small_object_neck: true
+
+train:
+  epochs: 120
+  batch_size: 4
+  max_batches_per_epoch: 0
+  optimizer: adamw
+  lr: 0.0003
+  weight_decay: 0.0005
+  early_stopping:
+    enabled: true
+    monitor: loss
+    mode: min
+    patience: 15
+    min_delta: 0.0005
+
+eval:
+  checkpoint: best
+  max_batches: 0
+  conf_thresh: 0.05
+  iou_thresh: 0.5

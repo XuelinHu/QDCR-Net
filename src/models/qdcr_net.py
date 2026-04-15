@@ -14,41 +14,85 @@ class _ConvBranch(nn.Module):
 
     def __init__(self, out_channels: int = 32) -> None:
         super().__init__()
-        self.layers = nn.Sequential(
+        self.encoder = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.Conv2d(16, out_channels, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
         )
+        self.spatial_pool = nn.AdaptiveAvgPool2d((8, 8))
+        self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
 
-    def forward(self, image: torch.Tensor) -> torch.Tensor:
-        """输出展平后的单向量特征，供后续 query 头使用。"""
-        return self.layers(image).flatten(1)
+    def forward(self, image: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """同时输出空间特征图和全局特征，兼顾定位与全局语义。"""
+        feature_map = self.encoder(image)
+        spatial_feature = self.spatial_pool(feature_map)
+        global_feature = self.global_pool(feature_map).flatten(1)
+        return spatial_feature, global_feature
 
 
 class _DetectionHead(nn.Module):
-    """共享检测头，同时输出类别 logits 与归一化边界框。"""
+    """基于空间 token 与 query 的检测头，同时输出类别 logits 与归一化边界框。"""
 
     def __init__(self, feature_dim: int, num_detection_classes: int) -> None:
         super().__init__()
+        self.token_proj = nn.Conv2d(feature_dim, feature_dim, kernel_size=1)
+        self.query_proj = nn.Linear(feature_dim, feature_dim)
+        self.query_norm = nn.LayerNorm(feature_dim)
         self.classifier = nn.Sequential(
             nn.Linear(feature_dim, feature_dim),
             nn.ReLU(inplace=True),
             nn.Linear(feature_dim, num_detection_classes),
         )
-        self.box_head = nn.Sequential(
+        self.box_size_scale = nn.Sequential(
             nn.Linear(feature_dim, feature_dim),
             nn.ReLU(inplace=True),
-            nn.Linear(feature_dim, 4),
+            nn.Linear(feature_dim, 2),
             nn.Sigmoid(),
         )
+        self.box_center_offset = nn.Sequential(
+            nn.Linear(feature_dim, feature_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(feature_dim, 2),
+            nn.Tanh(),
+        )
 
-    def forward(self, query_features: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """每个 query 都独立预测一个类别和一个边界框。"""
-        return self.classifier(query_features), self.box_head(query_features)
+    def forward(
+        self,
+        spatial_feature: torch.Tensor,
+        global_feature: torch.Tensor,
+        query_embedding: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """通过 query 在空间特征图上聚合局部证据，避免退化成固定模板框。"""
+        batch_size, _, height, width = spatial_feature.shape
+        tokens = self.token_proj(spatial_feature).flatten(2).transpose(1, 2)
+        query = self.query_proj(query_embedding).unsqueeze(0).expand(batch_size, -1, -1)
+        query = self.query_norm(query + global_feature.unsqueeze(1))
+        attention = torch.matmul(query, tokens.transpose(1, 2)) / (tokens.size(-1) ** 0.5)
+        attention = attention.softmax(dim=-1)
+        query_features = torch.matmul(attention, tokens) + global_feature.unsqueeze(1)
+        grid_y, grid_x = torch.meshgrid(
+            torch.linspace(0.0, 1.0, steps=height, device=spatial_feature.device, dtype=spatial_feature.dtype),
+            torch.linspace(0.0, 1.0, steps=width, device=spatial_feature.device, dtype=spatial_feature.dtype),
+            indexing="ij",
+        )
+        spatial_coords = torch.stack([grid_x, grid_y], dim=-1).reshape(height * width, 2)
+        coords = spatial_coords.unsqueeze(0).expand(batch_size, -1, -1)
+        centers = torch.matmul(attention, coords)
+        center_offset = self.box_center_offset(query_features) / max(height, width)
+        centers = (centers + center_offset).clamp(0.0, 1.0)
+        centered_coords = coords.unsqueeze(1) - centers.unsqueeze(2)
+        variances = torch.sum(attention.unsqueeze(-1) * centered_coords.pow(2), dim=2).clamp(min=1e-6)
+        base_sizes = 2.0 * torch.sqrt(variances)
+        size_scale = 0.5 + self.box_size_scale(query_features)
+        sizes = (base_sizes * size_scale).clamp(0.02, 1.0)
+        pred_boxes = torch.cat([centers, sizes], dim=-1)
+        return self.classifier(query_features), pred_boxes
 
 
 class QDCRNet(nn.Module):
@@ -70,16 +114,17 @@ class QDCRNet(nn.Module):
 
     def forward(self, raw_image: torch.Tensor, enhanced_image: torch.Tensor) -> dict[str, torch.Tensor]:
         # 两个分支分别提取特征，再通过交叉残差和质量感知模块融合。
-        raw_feature = self.raw_branch(raw_image)
-        enhanced_feature = self.enhanced_branch(enhanced_image)
+        raw_map, raw_feature = self.raw_branch(raw_image)
+        enhanced_map, enhanced_feature = self.enhanced_branch(enhanced_image)
         raw_feature, enhanced_feature = self.cross_residual(raw_feature, enhanced_feature)
         fused_feature = self.fusion(raw_feature, enhanced_feature)
-        # 将全局融合特征复制到每个 query 上，形成固定数量的候选检测槽位。
-        query_features = fused_feature.unsqueeze(1) + self.query_embed.weight.unsqueeze(0)
-        logits, pred_boxes = self.head(query_features)
+        fusion_gate = torch.sigmoid(fused_feature).unsqueeze(-1).unsqueeze(-1)
+        fused_map = fusion_gate * enhanced_map + (1.0 - fusion_gate) * raw_map
+        logits, pred_boxes = self.head(fused_map, fused_feature, self.query_embed.weight)
         return {
             "detections": logits,
             "fused_feature": fused_feature,
+            "fused_map": fused_map,
             "logits": logits,
             "pred_boxes": pred_boxes,
         }
@@ -131,12 +176,12 @@ class BaselineDetector(nn.Module):
     def forward(self, raw_image: torch.Tensor, enhanced_image: torch.Tensor) -> dict[str, torch.Tensor]:
         # 基线模型不使用增强图，只保留相同的输出协议，便于统一训练和评估流程。
         del enhanced_image
-        feature = self.branch(raw_image)
-        query_features = feature.unsqueeze(1) + self.query_embed.weight.unsqueeze(0)
-        logits, pred_boxes = self.head(query_features)
+        spatial_feature, feature = self.branch(raw_image)
+        logits, pred_boxes = self.head(spatial_feature, feature, self.query_embed.weight)
         return {
             "detections": logits,
             "fused_feature": feature,
+            "fused_map": spatial_feature,
             "logits": logits,
             "pred_boxes": pred_boxes,
         }

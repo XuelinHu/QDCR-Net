@@ -1,0 +1,30 @@
+experiment:
+  name: yolov8_brackish_rf_full
+  seed: 42
+  output_dir: outputs/checkpoints/yolov8_brackish_rf_full
+  runs_dir: runs/yolov8_brackish_rf_full
+  device: cuda
+dataset:
+  name: brackish_rf
+  train_root: data/datasets/downloads/Brackish/train/images
+  val_root: data/datasets/downloads/Brackish/valid/images
+  enhanced_root: data/datasets/downloads/Brackish/train/images
+  num_classes: 6
+  synthetic_size: 0
+  max_objects: 32
+  class_names: [crab, fish, jellyfish, shrimp, small_fish, starfish]
+  image_size: 640
+  workers: 4
+model:
+  name: yolov8
+  weights: yolov8n.pt
+train:
+  epochs: 100
+  batch_size: 16
+  lr: 0.01
+  weight_decay: 0.0005
+  early_stopping: {patience: 20}
+eval:
+  split: val
+  conf_thresh: 0.25
+  iou_thresh: 0.5
