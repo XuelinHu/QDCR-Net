@@ -1,0 +1,18 @@
+{
+  "experiment": "qdcr_uov2_map_probe_v2",
+  "model": "qdcr_net",
+  "dataset": "uov2",
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "epochs": 20,
+  "optimizer": "adamw",
+  "scheduler": "none",
+  "seed": 42,
+  "device": "cuda",
+  "weight_decay": 0.0005,
+  "image_size": 640,
+  "num_queries": 16,
+  "conf_thresh": 0.01,
+  "iou_thresh": 0.5,
+  "early_stop_monitor": "map50"
+}

@@ -1,0 +1,18 @@
+{
+  "experiment": "baseline_ruod_testb_eval",
+  "model": "baseline_detector",
+  "dataset": "ruod_testb",
+  "batch_size": 4,
+  "learning_rate": 0.0005,
+  "epochs": 100,
+  "optimizer": "adamw",
+  "scheduler": "none",
+  "seed": 42,
+  "device": "cuda",
+  "weight_decay": 0.0005,
+  "image_size": 320,
+  "num_queries": 8,
+  "conf_thresh": 0.25,
+  "iou_thresh": 0.5,
+  "early_stop_monitor": "loss"
+}

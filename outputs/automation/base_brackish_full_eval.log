@@ -1,0 +1,14 @@
+[2026-04-05 04:12:57,319] INFO qdcr.trainer: [eval] loaded checkpoint=outputs/checkpoints/baseline_brackish_full/best.pt metadata={'experiment': 'baseline_brackish_full', 'epoch': 37, 'samples': 26085, 'device': 'cuda', 'best_metric': 0.8125948595473343, 'monitor': 'loss'}
+[2026-04-05 04:12:57,319] INFO qdcr.trainer: [eval] experiment=baseline_brackish_full dataset_size=1238 batch_size=4 max_batches=0 device=cuda
+[2026-04-05 04:13:35,253] INFO qdcr.trainer: [eval] summary loss=0.8126 acc=0.55 iou=0.09 map50=0.002 map50_95=0.000 params=0.008M gflops=0.081 fps=0.00 samples=3244
+Evaluation metrics:
+  loss: 0.812595
+  acc: 0.553021
+  box_iou: 0.090082
+  map50: 0.002369
+  map50_95: 0.000347
+  precision: 0.026050
+  recall: 0.009408
+  params_m: 0.007915
+  gflops: 0.081139
+  fps: 0.000000

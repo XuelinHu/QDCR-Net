@@ -1,0 +1,160 @@
+[
+  {
+    "image_index": 0,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 1,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 2,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 3,
+    "scores": [
+      0.2504833936691284
+    ],
+    "classes": [
+      2
+    ],
+    "boxes": [
+      [
+        0.48658668994903564,
+        0.47973278164863586,
+        0.48140713572502136,
+        0.5462852120399475
+      ]
+    ]
+  },
+  {
+    "image_index": 4,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 5,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 6,
+    "scores": [
+      0.2507658898830414
+    ],
+    "classes": [
+      2
+    ],
+    "boxes": [
+      [
+        0.4872574210166931,
+        0.4808042049407959,
+        0.4817003905773163,
+        0.5460044145584106
+      ]
+    ]
+  },
+  {
+    "image_index": 7,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 8,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 9,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 10,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 11,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 12,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 13,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 14,
+    "scores": [
+      0.25138059258461
+    ],
+    "classes": [
+      2
+    ],
+    "boxes": [
+      [
+        0.48722153902053833,
+        0.48050543665885925,
+        0.481758713722229,
+        0.546033501625061
+      ]
+    ]
+  },
+  {
+    "image_index": 15,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 16,
+    "scores": [
+      0.25007346272468567
+    ],
+    "classes": [
+      2
+    ],
+    "boxes": [
+      [
+        0.4867386221885681,
+        0.4794732332229614,
+        0.4813297390937805,
+        0.5463918447494507
+      ]
+    ]
+  },
+  {
+    "image_index": 17,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  },
+  {
+    "image_index": 18,
+    "scores": [],
+    "classes": [],
+    "boxes": []
+  }
+]

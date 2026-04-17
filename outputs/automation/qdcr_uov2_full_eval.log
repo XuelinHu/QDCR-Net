@@ -1,0 +1,14 @@
+[2026-04-05 00:36:27,175] INFO qdcr.trainer: [eval] loaded checkpoint=outputs/checkpoints/qdcr_uov2_full/best.pt metadata={'experiment': 'qdcr_uov2_full', 'epoch': 17, 'samples': 27010, 'device': 'cuda', 'best_metric': 1.4663867264205792, 'monitor': 'loss'}
+[2026-04-05 00:36:27,176] INFO qdcr.trainer: [eval] experiment=qdcr_uov2_full dataset_size=1495 batch_size=4 max_batches=0 device=cuda
+[2026-04-05 00:37:18,965] INFO qdcr.trainer: [eval] summary loss=1.4664 acc=0.50 iou=0.06 map50=0.000 map50_95=0.000 params=0.018M gflops=0.162 fps=0.00 samples=7792
+Evaluation metrics:
+  loss: 1.466387
+  acc: 0.495380
+  box_iou: 0.056891
+  map50: 0.000047
+  map50_95: 0.000009
+  precision: 0.003007
+  recall: 0.004225
+  params_m: 0.018314
+  gflops: 0.162250
+  fps: 0.000000

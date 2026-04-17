@@ -1,0 +1,41 @@
+experiment:
+  name: qdcr_ruod_sample
+  seed: 42
+  output_dir: outputs/checkpoints/qdcr_ruod_sample
+  runs_dir: runs/qdcr_ruod_sample
+  device: cuda
+dataset:
+  train_root: data/datasets/downloads/RUOD/RUOD/train/images
+  val_root: data/datasets/downloads/RUOD/RUOD/valid/images
+  enhanced_root: data/datasets/downloads/RUOD/RUOD/train/images
+  num_classes: 4
+  synthetic_size: 0
+  max_objects: 8
+  class_names:
+  - holothurian
+  - echinus
+  - starfish
+  - scallop
+  image_size: 320
+  workers: 4
+model:
+  name: qdcr_net
+  feature_dim: 32
+  num_queries: 8
+  backbone: dual_branch
+  quality_aware: true
+  cross_residual_stages:
+  - stage2
+  - stage3
+  small_object_neck: true
+train:
+  epochs: 3
+  batch_size: 4
+  max_batches_per_epoch: 8
+  optimizer: adamw
+  lr: 0.001
+  weight_decay: 0.0005
+eval:
+  max_batches: 8
+  conf_thresh: 0.25
+  iou_thresh: 0.5

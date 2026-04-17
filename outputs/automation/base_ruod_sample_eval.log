@@ -1,0 +1,11 @@
+[2026-04-03 00:57:02,911] INFO qdcr.trainer: [eval] loaded checkpoint=outputs/checkpoints/baseline_ruod_sample/latest.pt metadata={'experiment': 'baseline_ruod_sample', 'epoch': 3, 'samples': 195, 'device': 'cuda'}
+[2026-04-03 00:57:02,911] INFO qdcr.trainer: [eval] experiment=baseline_ruod_sample dataset_size=1255 batch_size=4 max_batches=8 device=cuda
+[2026-04-03 00:57:04,622] INFO qdcr.trainer: [eval] summary loss=2.3150 acc=0.21 iou=0.04 map50=0.000 map50_95=0.000 samples=138
+Evaluation metrics:
+  loss: 2.315014
+  acc: 0.210145
+  box_iou: 0.037860
+  map50: 0.000000
+  map50_95: 0.000000
+  precision: 0.000000
+  recall: 0.000000

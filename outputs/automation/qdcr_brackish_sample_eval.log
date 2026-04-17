@@ -1,0 +1,11 @@
+[2026-04-03 00:50:37,391] INFO qdcr.trainer: [eval] loaded checkpoint=outputs/checkpoints/qdcr_brackish_sample/latest.pt metadata={'experiment': 'qdcr_brackish_sample', 'epoch': 3, 'samples': 80, 'device': 'cuda'}
+[2026-04-03 00:50:37,391] INFO qdcr.trainer: [eval] experiment=qdcr_brackish_sample dataset_size=1238 batch_size=4 max_batches=8 device=cuda
+[2026-04-03 00:50:39,278] INFO qdcr.trainer: [eval] summary loss=2.6236 acc=0.00 iou=0.04 map50=0.000 map50_95=0.000 samples=32
+Evaluation metrics:
+  loss: 2.623627
+  acc: 0.000000
+  box_iou: 0.038120
+  map50: 0.000000
+  map50_95: 0.000000
+  precision: 0.000000
+  recall: 0.000000

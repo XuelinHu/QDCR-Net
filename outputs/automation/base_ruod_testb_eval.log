@@ -1,0 +1,20 @@
+[2026-04-15 11:45:25,215] WARNING qdcr.trainer: [eval] skipped incompatible checkpoint=outputs/checkpoints/baseline_ruod_full/best.pt error=Error(s) in loading state_dict for BaselineDetector:
+	Missing key(s) in state_dict: "branch.encoder.0.weight", "branch.encoder.0.bias", "branch.encoder.1.weight", "branch.encoder.1.bias", "branch.encoder.1.running_mean", "branch.encoder.1.running_var", "branch.encoder.3.weight", "branch.encoder.3.bias", "branch.encoder.4.weight", "branch.encoder.4.bias", "branch.encoder.4.running_mean", "branch.encoder.4.running_var", "branch.encoder.6.weight", "branch.encoder.6.bias", "branch.encoder.7.weight", "branch.encoder.7.bias", "branch.encoder.7.running_mean", "branch.encoder.7.running_var", "head.token_proj.weight", "head.token_proj.bias", "head.query_proj.weight", "head.query_proj.bias", "head.query_norm.weight", "head.query_norm.bias", "head.box_size_head.0.weight", "head.box_size_head.0.bias", "head.box_size_head.2.weight", "head.box_size_head.2.bias", "head.box_center_offset.0.weight", "head.box_center_offset.0.bias", "head.box_center_offset.2.weight", "head.box_center_offset.2.bias". 
+	Unexpected key(s) in state_dict: "branch.layers.0.weight", "branch.layers.0.bias", "branch.layers.1.weight", "branch.layers.1.bias", "branch.layers.1.running_mean", "branch.layers.1.running_var", "branch.layers.1.num_batches_tracked", "branch.layers.3.weight", "branch.layers.3.bias", "branch.layers.4.weight", "branch.layers.4.bias", "branch.layers.4.running_mean", "branch.layers.4.running_var", "branch.layers.4.num_batches_tracked", "head.box_head.0.weight", "head.box_head.0.bias", "head.box_head.2.weight", "head.box_head.2.bias". 
+[2026-04-15 11:45:25,215] INFO qdcr.trainer: [eval] experiment=baseline_ruod_testb_eval dataset_size=53 batch_size=4 max_batches=0 device=cuda
+[2026-04-15 11:45:25,215] INFO qdcr.trainer: [eval] tensorboard_log_dir=/ds1/workspace/ai/QDCR-Net/runs/20260415-114525_baseline_detector_ruod_testb_bs4_lr0.0005_seed42_baseline_ruod_testb_eval
+[2026-04-15 11:45:32,417] INFO qdcr.trainer: [eval] summary loss=3.8400 acc=0.12 iou=0.03 map50=0.000 map50_95=0.000 params=0.020M gflops=0.111 fps=0.00 samples=322
+[2026-04-15 11:45:36,421] INFO qdcr.dingtalk: 钉钉机器人消息响应：{"errcode":0,"errmsg":"ok"}
+[2026-04-15 11:45:36,422] INFO qdcr.notify: [notify] dingtalk success message sent stage=评估
+TensorBoard log dir: /ds1/workspace/ai/QDCR-Net/runs/20260415-114525_baseline_detector_ruod_testb_bs4_lr0.0005_seed42_baseline_ruod_testb_eval
+Evaluation metrics:
+  loss: 3.840000
+  acc: 0.121118
+  box_iou: 0.027282
+  map50: 0.000000
+  map50_95: 0.000000
+  precision: 0.000000
+  recall: 0.000000
+  params_m: 0.020393
+  gflops: 0.110793
+  fps: 0.000000

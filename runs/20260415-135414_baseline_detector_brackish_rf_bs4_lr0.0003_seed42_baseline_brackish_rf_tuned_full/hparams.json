@@ -1,0 +1,18 @@
+{
+  "experiment": "baseline_brackish_rf_tuned_full",
+  "model": "baseline_detector",
+  "dataset": "brackish_rf",
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "epochs": 120,
+  "optimizer": "adamw",
+  "scheduler": "none",
+  "seed": 42,
+  "device": "cuda",
+  "weight_decay": 0.0005,
+  "image_size": 640,
+  "num_queries": 16,
+  "conf_thresh": 0.05,
+  "iou_thresh": 0.5,
+  "early_stop_monitor": "loss"
+}
