@@ -1,0 +1,48 @@
+{
+  "experiment_name": "yolov8_ruod_full",
+  "output_dir": "outputs/checkpoints/yolov8_ruod_full",
+  "runs_dir": "runs/yolov8_ruod_full",
+  "device": "cuda",
+  "seed": 42,
+  "dataset": {
+    "name": "ruod",
+    "train_root": "data/datasets/downloads/RUOD/RUOD/train/images",
+    "val_root": "data/datasets/downloads/RUOD/RUOD/valid/images",
+    "enhanced_root": "data/datasets/downloads/RUOD/RUOD/train/images",
+    "num_classes": 4,
+    "image_size": 640,
+    "max_objects": 32
+  },
+  "model": {
+    "name": "yolov8",
+    "weights": "yolov8n.pt"
+  },
+  "train": {
+    "epochs": 100,
+    "batch_size": 64,
+    "optimizer": "ultralytics_default",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0005,
+    "early_stopping": {
+      "patience": 20
+    }
+  },
+  "eval": {
+    "split": "val",
+    "conf_thresh": 0.25,
+    "iou_thresh": 0.5
+  },
+  "loss": {
+    "name": "UltralyticsDetectionLoss",
+    "components": [
+      "box_loss",
+      "cls_loss",
+      "dfl_loss"
+    ]
+  },
+  "artifacts": {
+    "data_yaml": "outputs/checkpoints/yolov8_ruod_full/data.yaml",
+    "best_checkpoint": "outputs/checkpoints/yolov8_ruod_full/weights/best.pt",
+    "metrics_path": "outputs/checkpoints/yolov8_ruod_full/metrics.json"
+  }
+}

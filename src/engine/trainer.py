@@ -5,12 +5,14 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import random
+import tempfile
 import time
 from typing import Any
 
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
+import yaml
 
 from src.datasets import UnderwaterDetectionDataset
 from src.engine.detection_ops import compute_detection_metrics, decode_predictions, greedy_match, pairwise_iou_xywh
@@ -34,6 +36,8 @@ class Trainer:
         self.best_checkpoint_path = self.output_dir / "best.pt"
         self.prediction_path = self.output_dir / "predictions.json"
         self.metrics_path = self.output_dir / "metrics.json"
+        self.config_snapshot_path = self.output_dir / "experiment_config.yaml"
+        self.summary_path = self.output_dir / "experiment_summary.json"
         self.device = torch.device(
             experiment_config.get(
                 "device",
@@ -55,6 +59,15 @@ class Trainer:
         optimizer = self._build_optimizer(model)
         tracker = ExperimentTracker(self.config)
         self.run_dir = tracker.run_dir
+        use_amp = self.device.type == "cuda" and bool(train_config.get("amp", True))
+        scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+        num_workers = max(0, int(self.config.get("dataset", {}).get("workers", 0)))
+        pin_memory = self.device.type == "cuda"
+        persistent_workers = num_workers > 0
+        prefetch_factor = max(1, int(self.config.get("dataset", {}).get("prefetch_factor", 2)))
+        log_graph = bool(train_config.get("log_graph", False))
+        log_histograms = bool(train_config.get("log_histograms", False))
+        eval_interval = max(1, int(train_config.get("eval_interval", 5)))
         batch_size = min(int(train_config.get("batch_size", 4)), len(train_dataset))
         eval_batch_size = min(int(train_config.get("batch_size", 4)), len(val_dataset))
         max_batches = int(train_config.get("max_batches_per_epoch", 2))
@@ -65,20 +78,35 @@ class Trainer:
         monitor = str(early_stopping.get("monitor", "loss"))
         mode = str(early_stopping.get("mode", "min")).lower()
         enabled = bool(early_stopping.get("enabled", True))
+        log_interval = max(1, int(train_config.get("log_interval", 10)))
+        scalar_log_interval = max(1, int(train_config.get("scalar_log_interval", log_interval)))
         # DataLoader 统一走同一个 collate_fn，兼容每张图目标数量不同的情况。
+        train_loader_kwargs = {
+            "batch_size": max(batch_size, 1),
+            "shuffle": True,
+            "num_workers": num_workers,
+            "collate_fn": self._collate_batch,
+            "pin_memory": pin_memory,
+        }
+        val_loader_kwargs = {
+            "batch_size": max(eval_batch_size, 1),
+            "shuffle": False,
+            "num_workers": num_workers,
+            "collate_fn": self._collate_batch,
+            "pin_memory": pin_memory,
+        }
+        if num_workers > 0:
+            train_loader_kwargs["persistent_workers"] = persistent_workers
+            val_loader_kwargs["persistent_workers"] = persistent_workers
+            train_loader_kwargs["prefetch_factor"] = prefetch_factor
+            val_loader_kwargs["prefetch_factor"] = prefetch_factor
         train_loader = DataLoader(
             train_dataset,
-            batch_size=max(batch_size, 1),
-            shuffle=True,
-            num_workers=0,
-            collate_fn=self._collate_batch,
+            **train_loader_kwargs,
         )
         val_loader = DataLoader(
             val_dataset,
-            batch_size=max(eval_batch_size, 1),
-            shuffle=False,
-            num_workers=0,
-            collate_fn=self._collate_batch,
+            **val_loader_kwargs,
         )
         best_metric = float("inf") if mode == "min" else float("-inf")
         epochs_without_improvement = 0
@@ -100,9 +128,24 @@ class Trainer:
             min_delta,
         )
         self.logger.info("[train] tensorboard_log_dir=%s", self.run_dir)
+        self.logger.info(
+            "[train] dataloader workers=%s pin_memory=%s persistent_workers=%s prefetch_factor=%s log_interval=%s scalar_log_interval=%s amp=%s eval_interval=%s",
+            num_workers,
+            pin_memory,
+            persistent_workers,
+            prefetch_factor if num_workers > 0 else 0,
+            log_interval,
+            scalar_log_interval,
+            use_amp,
+            eval_interval,
+        )
 
         try:
+            self._write_config_snapshot()
+            self._write_experiment_summary(loss_fn=loss_fn)
             self._log_hparams(tracker)
+            self._prepare_dataset_cache(train_dataset, split="train")
+            self._prepare_dataset_cache(val_dataset, split="val")
             if self.checkpoint_path.exists():
                 try:
                     # 若存在 latest checkpoint，则优先从最近训练进度继续。
@@ -135,19 +178,20 @@ class Trainer:
                     if max_batches > 0 and batch_index >= max_batches:
                         break
 
-                    raw_image = batch["raw_image"].to(self.device)
-                    enhanced_image = batch["enhanced_image"].to(self.device)
-                    if global_step == 0:
+                    raw_image = batch["raw_image"].to(self.device, non_blocking=pin_memory)
+                    enhanced_image = batch["enhanced_image"].to(self.device, non_blocking=pin_memory)
+                    if global_step == 0 and log_graph:
                         self._try_log_graph(tracker, model, raw_image, enhanced_image)
-                    predictions = model(raw_image, enhanced_image)
-                    # 先把固定 query 与真实目标对齐，再进入损失计算。
-                    matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
-
                     optimizer.zero_grad(set_to_none=True)
-                    loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
-                    loss = loss_output["loss"]
-                    loss.backward()
-                    optimizer.step()
+                    with torch.amp.autocast(device_type=self.device.type, enabled=use_amp):
+                        predictions = model(raw_image, enhanced_image)
+                        # 先把固定 query 与真实目标对齐，再进入损失计算。
+                        matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
+                        loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
+                        loss = loss_output["loss"]
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
 
                     batch_iou = self._mean_iou(loss_output["pred_boxes"], matched_boxes, matched_mask)
                     batch_correct = self._count_class_matches(
@@ -166,29 +210,31 @@ class Trainer:
                     sample_count += batch_size_value
                     global_step += 1
 
-                    tracker.log_scalar("train/loss_step", batch_loss_value, global_step)
-                    tracker.log_scalar("train/lr", self._current_lr(optimizer), global_step)
-                    tracker.log_scalar("train/batch_acc", batch_acc_value, global_step)
-                    tracker.log_scalar("train/batch_box_iou", batch_iou, global_step)
-                    tracker.log_scalar(
-                        "train/batch_cls_loss",
-                        float(loss_output["classification_loss"].item()),
-                        global_step,
-                    )
-                    tracker.log_scalar(
-                        "train/batch_box_loss",
-                        float(loss_output["box_loss"].item()),
-                        global_step,
-                    )
-                    self.logger.info(
-                        "[train] epoch=%s batch=%s loss=%.4f acc=%.2f iou=%.2f objects=%s",
-                        epoch_index + 1,
-                        batch_index + 1,
-                        batch_loss_value,
-                        batch_acc_value,
-                        batch_iou,
-                        batch_size_value,
-                    )
+                    if global_step % scalar_log_interval == 0:
+                        tracker.log_scalar("train/loss_step", batch_loss_value, global_step)
+                        tracker.log_scalar("train/lr", self._current_lr(optimizer), global_step)
+                        tracker.log_scalar("train/batch_acc", batch_acc_value, global_step)
+                        tracker.log_scalar("train/batch_box_iou", batch_iou, global_step)
+                        tracker.log_scalar(
+                            "train/batch_cls_loss",
+                            float(loss_output["classification_loss"].item()),
+                            global_step,
+                        )
+                        tracker.log_scalar(
+                            "train/batch_box_loss",
+                            float(loss_output["box_loss"].item()),
+                            global_step,
+                        )
+                    if (batch_index + 1) % log_interval == 0 or batch_index == 0:
+                        self.logger.info(
+                            "[train] epoch=%s batch=%s loss=%.4f acc=%.2f iou=%.2f objects=%s",
+                            epoch_index + 1,
+                            batch_index + 1,
+                            batch_loss_value,
+                            batch_acc_value,
+                            batch_iou,
+                            batch_size_value,
+                        )
 
                 epoch_loss_value = epoch_loss / max(sample_count, 1)
                 epoch_acc_value = epoch_correct / max(sample_count, 1)
@@ -196,7 +242,8 @@ class Trainer:
                 tracker.log_scalar("train/loss_epoch", epoch_loss_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_acc", epoch_acc_value, epoch_index + 1)
                 tracker.log_scalar("train/epoch_box_iou", epoch_iou_value, epoch_index + 1)
-                tracker.log_parameter_histograms(model.named_parameters(), epoch_index + 1)
+                if log_histograms:
+                    tracker.log_parameter_histograms(model.named_parameters(), epoch_index + 1)
                 # 每轮先保存 latest，便于异常中断后继续训练。
                 model.save_checkpoint(
                     self.checkpoint_path,
@@ -208,6 +255,14 @@ class Trainer:
                         "device": str(self.device),
                     },
                 )
+                should_eval = (epoch_index + 1) % eval_interval == 0 or (epoch_index + 1) == epochs
+                if not should_eval:
+                    self.logger.info(
+                        "[train] epoch=%s skipped validation eval_interval=%s",
+                        epoch_index + 1,
+                        eval_interval,
+                    )
+                    continue
                 val_metrics = self._evaluate_model(
                     model=model,
                     loss_fn=loss_fn,
@@ -218,6 +273,8 @@ class Trainer:
                     tracker=tracker,
                     tracker_step=epoch_index + 1,
                     metric_prefix="val",
+                    use_amp=use_amp,
+                    pin_memory=pin_memory,
                 )
                 final_val_metrics = val_metrics
                 monitored_value = float(val_metrics[monitor])
@@ -293,14 +350,17 @@ class Trainer:
         loss_fn = DetectionLoss().to(self.device)
         tracker = ExperimentTracker(self.config)
         self.run_dir = tracker.run_dir
+        use_amp = self.device.type == "cuda" and bool(self.config.get("train", {}).get("amp", True))
         batch_size = min(int(self.config.get("train", {}).get("batch_size", 4)), len(val_dataset))
         max_batches = int(self.config.get("eval", {}).get("max_batches", 2))
+        self._prepare_dataset_cache(val_dataset, split="eval")
         val_loader = DataLoader(
             val_dataset,
             batch_size=max(batch_size, 1),
             shuffle=False,
-            num_workers=0,
+            num_workers=max(0, int(self.config.get("dataset", {}).get("workers", 0))),
             collate_fn=self._collate_batch,
+            pin_memory=self.device.type == "cuda",
         )
 
         try:
@@ -341,6 +401,8 @@ class Trainer:
                 tracker=tracker,
                 tracker_step=1,
                 metric_prefix="eval",
+                use_amp=use_amp,
+                pin_memory=self.device.type == "cuda",
             )
             # 额外补充参数量、GFLOPs 与 FPS，便于和论文表格对齐。
             complexity_metrics = self._complexity_metrics(model, self._last_profile_batch)
@@ -351,6 +413,7 @@ class Trainer:
                 iou_thresh=float(eval_config.get("iou_thresh", 0.5)),
                 max_batches=min(max_batches, 10),
                 batch_size=min(int(self.config.get("train", {}).get("batch_size", 4)), len(val_dataset)),
+                use_amp=use_amp,
             )
             metrics.update(complexity_metrics)
             metrics.update(speed_metrics)
@@ -411,10 +474,23 @@ class Trainer:
         model_config = self.config.get("model", {})
         model_name = str(model_config.get("name", "qdcr_net")).lower()
         model_cls = BaselineDetector if "baseline" in model_name else QDCRNet
+        common_kwargs = {
+            "num_classes": int(dataset_config.get("num_classes", 4)),
+            "feature_dim": int(model_config.get("feature_dim", 32)),
+            "num_queries": int(model_config.get("num_queries", dataset_config.get("max_objects", 8))),
+        }
+        if model_cls is BaselineDetector:
+            return model_cls(**common_kwargs)
         return model_cls(
-            num_classes=int(dataset_config.get("num_classes", 4)),
-            feature_dim=int(model_config.get("feature_dim", 32)),
-            num_queries=int(model_config.get("num_queries", dataset_config.get("max_objects", 8))),
+            **common_kwargs,
+            cross_residual_mode=str(model_config.get("cross_residual_mode", "vanilla")),
+            cross_residual_threshold_init=float(model_config.get("cross_residual_threshold_init", 0.1)),
+            cross_residual_threshold_slope=float(model_config.get("cross_residual_threshold_slope", 10.0)),
+            cross_residual_sparse_mode=str(model_config.get("cross_residual_sparse_mode", "soft_threshold")),
+            cross_residual_sparse_lambda_init=float(
+                model_config.get("cross_residual_sparse_lambda_init", 0.1)
+            ),
+            cross_residual_topk_ratio=float(model_config.get("cross_residual_topk_ratio", 0.5)),
         )
 
     def _build_optimizer(self, model: torch.nn.Module) -> torch.optim.Optimizer:
@@ -579,6 +655,8 @@ class Trainer:
         tracker: ExperimentTracker | None = None,
         tracker_step: int | None = None,
         metric_prefix: str = "val",
+        use_amp: bool = False,
+        pin_memory: bool = False,
     ) -> dict[str, float]:
         """在验证集上运行模型并汇总核心指标。"""
         total_loss = 0.0
@@ -595,17 +673,18 @@ class Trainer:
                 if max_batches > 0 and batch_index >= max_batches:
                     break
 
-                raw_image = batch["raw_image"].to(self.device)
-                enhanced_image = batch["enhanced_image"].to(self.device)
+                raw_image = batch["raw_image"].to(self.device, non_blocking=pin_memory)
+                enhanced_image = batch["enhanced_image"].to(self.device, non_blocking=pin_memory)
                 if profile_batch is None:
                     # 保留首个 batch 的一个样本，用于后续复杂度估算。
                     profile_batch = {
                         "raw_image": raw_image[:1],
                         "enhanced_image": enhanced_image[:1],
                     }
-                predictions = model(raw_image, enhanced_image)
-                matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
-                loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
+                with torch.amp.autocast(device_type=self.device.type, enabled=use_amp):
+                    predictions = model(raw_image, enhanced_image)
+                    matched_classes, matched_boxes, matched_mask = self._match_batch(predictions, batch)
+                    loss_output = loss_fn(predictions, matched_classes, matched_boxes, matched_mask)
 
                 batch_size_value = int(matched_mask.sum().item())
                 total_loss += float(loss_output["loss"].item()) * batch_size_value
@@ -697,11 +776,128 @@ class Trainer:
             "device": str(self.device),
             "weight_decay": float(train_config.get("weight_decay", 0.0)),
             "image_size": int(dataset_config.get("image_size", 128)),
+            "num_workers": int(dataset_config.get("workers", 0)),
+            "pin_memory": self.device.type == "cuda",
+            "persistent_workers": int(dataset_config.get("workers", 0)) > 0,
+            "prefetch_factor": int(dataset_config.get("prefetch_factor", 2)),
+            "cache_preprocessed": bool(dataset_config.get("cache_preprocessed", True)),
+            "feature_dim": int(model_config.get("feature_dim", 32)),
             "num_queries": int(model_config.get("num_queries", dataset_config.get("max_objects", 8))),
+            "cross_residual_mode": str(model_config.get("cross_residual_mode", "vanilla")),
+            "cross_residual_threshold_init": float(model_config.get("cross_residual_threshold_init", 0.1)),
+            "cross_residual_threshold_slope": float(model_config.get("cross_residual_threshold_slope", 10.0)),
+            "cross_residual_sparse_mode": str(model_config.get("cross_residual_sparse_mode", "soft_threshold")),
+            "cross_residual_sparse_lambda_init": float(
+                model_config.get("cross_residual_sparse_lambda_init", 0.1)
+            ),
+            "cross_residual_topk_ratio": float(model_config.get("cross_residual_topk_ratio", 0.5)),
             "conf_thresh": float(eval_config.get("conf_thresh", 0.25)),
             "iou_thresh": float(eval_config.get("iou_thresh", 0.5)),
             "early_stop_monitor": early_stopping.get("monitor", "loss"),
+            "log_interval": int(train_config.get("log_interval", 10)),
+            "scalar_log_interval": int(train_config.get("scalar_log_interval", train_config.get("log_interval", 10))),
+            "eval_interval": int(train_config.get("eval_interval", 5)),
+            "amp": bool(train_config.get("amp", True)),
+            "log_graph": bool(train_config.get("log_graph", False)),
+            "log_histograms": bool(train_config.get("log_histograms", False)),
+            "loss_box_weight": 5.0,
+            "loss_iou_weight": 2.0,
+            "loss_focal_gamma": 2.0,
+            "loss_background_weight": 0.2,
         }
+
+    def _write_config_snapshot(self) -> None:
+        """把完整实验配置复制到输出目录，便于事后复现实验。"""
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.config_snapshot_path.write_text(
+            yaml.safe_dump(self.config, sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+
+    def _write_experiment_summary(self, loss_fn: DetectionLoss) -> None:
+        """额外写出一份关键超参摘要，减少后续查日志成本。"""
+        experiment_config = self.config.get("experiment", {})
+        dataset_config = self.config.get("dataset", {})
+        model_config = self.config.get("model", {})
+        train_config = self.config.get("train", {})
+        eval_config = self.config.get("eval", {})
+        early_stopping = train_config.get("early_stopping", {})
+        summary = {
+            "experiment_name": experiment_config.get("name", "unknown"),
+            "output_dir": str(self.output_dir),
+            "runs_dir": experiment_config.get("runs_dir", ""),
+            "device": str(self.device),
+            "seed": int(experiment_config.get("seed", 42)),
+            "dataset": {
+                "name": self._dataset_name(),
+                "train_root": dataset_config.get("train_root", ""),
+                "val_root": dataset_config.get("val_root", ""),
+                "enhanced_root": dataset_config.get("enhanced_root", ""),
+                "num_classes": int(dataset_config.get("num_classes", 4)),
+                "image_size": int(dataset_config.get("image_size", 128)),
+                "max_objects": int(dataset_config.get("max_objects", 8)),
+                "workers": int(dataset_config.get("workers", 0)),
+                "prefetch_factor": int(dataset_config.get("prefetch_factor", 2)),
+                "cache_preprocessed": bool(dataset_config.get("cache_preprocessed", True)),
+                "cache_dir": str(dataset_config.get("cache_dir", "")),
+            },
+            "model": {
+                "name": model_config.get("name", "unknown"),
+                "feature_dim": int(model_config.get("feature_dim", 32)),
+                "num_queries": int(model_config.get("num_queries", dataset_config.get("max_objects", 8))),
+                "quality_aware": bool(model_config.get("quality_aware", False)),
+                "cross_residual_mode": str(model_config.get("cross_residual_mode", "vanilla")),
+                "cross_residual_threshold_init": float(model_config.get("cross_residual_threshold_init", 0.1)),
+                "cross_residual_threshold_slope": float(model_config.get("cross_residual_threshold_slope", 10.0)),
+                "cross_residual_sparse_mode": str(model_config.get("cross_residual_sparse_mode", "soft_threshold")),
+                "cross_residual_sparse_lambda_init": float(
+                    model_config.get("cross_residual_sparse_lambda_init", 0.1)
+                ),
+                "cross_residual_topk_ratio": float(model_config.get("cross_residual_topk_ratio", 0.5)),
+                "cross_residual_stages": model_config.get("cross_residual_stages", []),
+                "small_object_neck": bool(model_config.get("small_object_neck", False)),
+            },
+            "train": {
+                "epochs": int(train_config.get("epochs", 1)),
+                "batch_size": int(train_config.get("batch_size", 4)),
+                "optimizer": train_config.get("optimizer", "adamw"),
+                "learning_rate": float(train_config.get("lr", 1e-3)),
+                "weight_decay": float(train_config.get("weight_decay", 0.0)),
+                "max_batches_per_epoch": int(train_config.get("max_batches_per_epoch", 0)),
+                "log_interval": int(train_config.get("log_interval", 10)),
+                "scalar_log_interval": int(
+                    train_config.get("scalar_log_interval", train_config.get("log_interval", 10))
+                ),
+                "eval_interval": int(train_config.get("eval_interval", 5)),
+                "amp": bool(train_config.get("amp", True)),
+                "log_graph": bool(train_config.get("log_graph", False)),
+                "log_histograms": bool(train_config.get("log_histograms", False)),
+                "pin_memory": self.device.type == "cuda",
+                "persistent_workers": int(dataset_config.get("workers", 0)) > 0,
+                "early_stopping": {
+                    "enabled": bool(early_stopping.get("enabled", True)),
+                    "monitor": early_stopping.get("monitor", "loss"),
+                    "mode": early_stopping.get("mode", "min"),
+                    "patience": int(early_stopping.get("patience", 5)),
+                    "min_delta": float(early_stopping.get("min_delta", 1e-4)),
+                },
+            },
+            "eval": {
+                "checkpoint": eval_config.get("checkpoint", "best"),
+                "max_batches": int(eval_config.get("max_batches", 0)),
+                "conf_thresh": float(eval_config.get("conf_thresh", 0.25)),
+                "iou_thresh": float(eval_config.get("iou_thresh", 0.5)),
+            },
+            "loss": {
+                "name": loss_fn.__class__.__name__,
+                "box_weight": float(loss_fn.box_weight),
+                "iou_weight": float(loss_fn.iou_weight),
+                "focal_gamma": float(loss_fn.focal_gamma),
+                "background_weight": float(loss_fn.background_weight),
+                "box_regression": "SmoothL1Loss",
+            },
+        }
+        self.summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def _dataset_name(self) -> str:
         dataset_config = self.config.get("dataset", {})
@@ -818,6 +1014,7 @@ class Trainer:
         iou_thresh: float,
         max_batches: int,
         batch_size: int,
+        use_amp: bool,
     ) -> dict[str, float]:
         """估算推理 FPS，并跳过首个 batch 作为预热。"""
         if len(dataset) == 0 or max_batches <= 0:
@@ -841,19 +1038,20 @@ class Trainer:
             for batch_index, batch in enumerate(loader):
                 if max_batches > 0 and batch_index >= max_batches:
                     break
-                raw_image = batch["raw_image"].to(self.device)
-                enhanced_image = batch["enhanced_image"].to(self.device)
+                raw_image = batch["raw_image"].to(self.device, non_blocking=self.device.type == "cuda")
+                enhanced_image = batch["enhanced_image"].to(self.device, non_blocking=self.device.type == "cuda")
                 if self.device.type == "cuda":
                     torch.cuda.synchronize(self.device)
                 batch_start = time.perf_counter()
-                predictions = model(raw_image, enhanced_image)
-                decode_predictions(
-                    predictions["logits"],
-                    predictions["pred_boxes"],
-                    background_class=self._background_class,
-                    conf_thresh=conf_thresh,
-                    iou_thresh=iou_thresh,
-                )
+                with torch.amp.autocast(device_type=self.device.type, enabled=use_amp):
+                    predictions = model(raw_image, enhanced_image)
+                    decode_predictions(
+                        predictions["logits"],
+                        predictions["pred_boxes"],
+                        background_class=self._background_class,
+                        conf_thresh=conf_thresh,
+                        iou_thresh=iou_thresh,
+                    )
                 if self.device.type == "cuda":
                     torch.cuda.synchronize(self.device)
                 batch_elapsed = time.perf_counter() - batch_start
@@ -870,3 +1068,16 @@ class Trainer:
         if timed_batches == 0 or start_time <= 0.0:
             return {"fps": 0.0}
         return {"fps": timed_images / start_time}
+
+    def _prepare_dataset_cache(self, dataset: UnderwaterDetectionDataset, split: str) -> None:
+        """把图像预处理结果写入临时目录，减少训练期的重复 CPU 变换。"""
+        dataset_config = self.config.get("dataset", {})
+        cache_enabled = bool(dataset_config.get("cache_preprocessed", True))
+        if not cache_enabled:
+            return
+        cache_root = dataset_config.get("cache_dir")
+        if cache_root is None:
+            cache_root = Path(tempfile.gettempdir()) / "qdcr_preprocessed"
+        else:
+            cache_root = Path(cache_root)
+        dataset.prepare_cache(cache_root / split)

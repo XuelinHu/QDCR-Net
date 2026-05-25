@@ -1,0 +1,9 @@
+path: /ds1/workspace/ai/QDCR-Net/data/datasets/downloads/RUOD/RUOD
+train: /ds1/workspace/ai/QDCR-Net/data/datasets/downloads/RUOD/RUOD/train/images
+val: /ds1/workspace/ai/QDCR-Net/data/datasets/downloads/RUOD/RUOD/valid/images
+nc: 4
+names:
+- holothurian
+- echinus
+- starfish
+- scallop

@@ -4,6 +4,7 @@
 from dataclasses import dataclass, field
 import hashlib
 from pathlib import Path
+import tempfile
 from typing import Any
 
 from PIL import Image
@@ -23,6 +24,7 @@ class UnderwaterDetectionDataset(Dataset):
     image_size: int = 128
     synthetic_size: int = 32
     max_objects: int = 8
+    cache_dir: Path | None = None
     _samples: list[dict[str, Any]] = field(init=False, repr=False, default_factory=list)
 
     def __post_init__(self) -> None:
@@ -30,6 +32,7 @@ class UnderwaterDetectionDataset(Dataset):
         self.image_root = Path(self.image_root)
         self.annotation_root = Path(self.annotation_root) if self.annotation_root else None
         self.enhanced_root = Path(self.enhanced_root) if self.enhanced_root else None
+        self.cache_dir = Path(self.cache_dir) if self.cache_dir else None
         self.transform = transforms.Compose(
             [
                 transforms.Resize((self.image_size, self.image_size)),
@@ -56,13 +59,11 @@ class UnderwaterDetectionDataset(Dataset):
     def __getitem__(self, index: int) -> dict[str, Any]:
         """按索引返回一个样本，统一输出原图、增强图和标注。"""
         sample = self._samples[index]
-        if sample["source"] == "real":
-            raw_image = self._load_image_tensor(sample["image_path"])
-            enhanced_image = (
-                self._load_image_tensor(sample["enhanced_path"])
-                if sample["enhanced_path"] is not None
-                else self._auto_enhance(raw_image)
-            )
+        cached = self._load_cached_pair(sample)
+        if cached is not None:
+            raw_image, enhanced_image = cached
+        elif sample["source"] == "real":
+            raw_image, enhanced_image = self._build_real_pair(sample)
         else:
             # 合成样本直接动态生成一对原图/增强图，避免额外落盘。
             raw_image, enhanced_image = self._build_synthetic_pair(sample["sample_id"], sample["annotations"])
@@ -83,6 +84,30 @@ class UnderwaterDetectionDataset(Dataset):
             "gt_classes": gt_classes,
             "source": sample["source"],
         }
+
+    def prepare_cache(self, cache_dir: Path | None = None) -> None:
+        """在训练前把图像变换结果预写到临时目录，减少运行时 CPU 开销。"""
+        target_dir = Path(cache_dir) if cache_dir is not None else self.cache_dir
+        if target_dir is None:
+            target_dir = Path(tempfile.gettempdir()) / "qdcr_preprocessed" / self._cache_namespace()
+        target_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_dir = target_dir
+
+        for sample in self._samples:
+            cache_path = self._cache_path(sample)
+            if cache_path is None or cache_path.exists():
+                continue
+            if sample["source"] == "real":
+                raw_image, enhanced_image = self._build_real_pair(sample)
+            else:
+                raw_image, enhanced_image = self._build_synthetic_pair(sample["sample_id"], sample["annotations"])
+            torch.save(
+                {
+                    "raw_image": raw_image.contiguous(),
+                    "enhanced_image": enhanced_image.contiguous(),
+                },
+                cache_path,
+            )
 
     def _discover_images(self, root: Path) -> list[Path]:
         """递归发现数据目录里的常见图像文件。"""
@@ -201,6 +226,40 @@ class UnderwaterDetectionDataset(Dataset):
         """读取单张图像并转换为模型输入张量。"""
         image = Image.open(path).convert("RGB")
         return self.transform(image)
+
+    def _build_real_pair(self, sample: dict[str, Any]) -> tuple[torch.Tensor, torch.Tensor]:
+        raw_image = self._load_image_tensor(sample["image_path"])
+        enhanced_image = (
+            self._load_image_tensor(sample["enhanced_path"])
+            if sample["enhanced_path"] is not None
+            else self._auto_enhance(raw_image)
+        )
+        return raw_image, enhanced_image
+
+    def _load_cached_pair(self, sample: dict[str, Any]) -> tuple[torch.Tensor, torch.Tensor] | None:
+        cache_path = self._cache_path(sample)
+        if cache_path is None or not cache_path.exists():
+            return None
+        payload = torch.load(cache_path, map_location="cpu")
+        return payload["raw_image"], payload["enhanced_image"]
+
+    def _cache_path(self, sample: dict[str, Any]) -> Path | None:
+        if self.cache_dir is None:
+            return None
+        cache_key = hashlib.sha256(sample["sample_id"].encode("utf-8")).hexdigest()
+        return self.cache_dir / f"{cache_key}.pt"
+
+    def _cache_namespace(self) -> str:
+        signature = "|".join(
+            [
+                str(self.image_root),
+                str(self.enhanced_root),
+                str(self.image_size),
+                str(self.max_objects),
+                str(len(self._samples)),
+            ]
+        )
+        return hashlib.sha256(signature.encode("utf-8")).hexdigest()[:16]
 
     def _auto_enhance(self, image_tensor: torch.Tensor) -> torch.Tensor:
         """当缺少增强图时，使用简单亮度/对比度提升做兜底。"""

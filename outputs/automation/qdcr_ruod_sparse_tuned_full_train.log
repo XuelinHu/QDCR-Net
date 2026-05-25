@@ -1,0 +1,609 @@
+/ds1/workspace/ai/QDCR-Net/src/engine/trainer.py:63: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+[2026-04-19 09:07:05,553] INFO qdcr.trainer: [train] experiment=qdcr_ruod_sparse_tuned_full dataset_size=3013 batch_size=100 epochs=120 max_batches=0 device=cuda early_stopping=True monitor=loss mode=min patience=15 min_delta=0.000500
+[2026-04-19 09:07:05,553] INFO qdcr.trainer: [train] tensorboard_log_dir=/ds1/workspace/ai/QDCR-Net/runs/20260419-090705_qdcr_net_ruod_bs100_lr0.0003_seed42_qdcr_ruod_sparse_tuned_full
+[2026-04-19 09:07:05,553] INFO qdcr.trainer: [train] dataloader workers=1 pin_memory=True persistent_workers=True prefetch_factor=1 log_interval=10 scalar_log_interval=10 amp=True eval_interval=5
+[2026-04-19 09:07:05,607] INFO qdcr.trainer: [train] resumed checkpoint=outputs/checkpoints/qdcr_ruod_sparse_tuned_full/latest.pt metadata={'experiment': 'qdcr_ruod_sparse_tuned_full', 'epoch': 96, 'samples': 21401, 'device': 'cuda'}
+[2026-04-19 09:07:09,485] INFO qdcr.trainer: [train] epoch=1 batch=1 loss=2.1252 acc=0.57 iou=0.12 objects=763
+[2026-04-19 09:07:27,786] INFO qdcr.trainer: [train] epoch=1 batch=10 loss=2.1345 acc=0.60 iou=0.12 objects=705
+[2026-04-19 09:07:49,259] INFO qdcr.trainer: [train] epoch=1 batch=20 loss=2.1806 acc=0.54 iou=0.11 objects=660
+[2026-04-19 09:08:14,151] INFO qdcr.trainer: [train] epoch=1 batch=30 loss=2.1284 acc=0.51 iou=0.13 objects=641
+[2026-04-19 09:08:14,239] INFO qdcr.trainer: [train] epoch=1 skipped validation eval_interval=5
+[2026-04-19 09:08:16,597] INFO qdcr.trainer: [train] epoch=2 batch=1 loss=2.0855 acc=0.57 iou=0.14 objects=728
+[2026-04-19 09:08:34,928] INFO qdcr.trainer: [train] epoch=2 batch=10 loss=2.0746 acc=0.62 iou=0.15 objects=782
+[2026-04-19 09:08:56,704] INFO qdcr.trainer: [train] epoch=2 batch=20 loss=2.1184 acc=0.54 iou=0.13 objects=687
+[2026-04-19 09:09:20,027] INFO qdcr.trainer: [train] epoch=2 batch=30 loss=2.1607 acc=0.55 iou=0.12 objects=721
+[2026-04-19 09:09:20,098] INFO qdcr.trainer: [train] epoch=2 skipped validation eval_interval=5
+[2026-04-19 09:09:22,452] INFO qdcr.trainer: [train] epoch=3 batch=1 loss=2.1119 acc=0.57 iou=0.15 objects=786
+[2026-04-19 09:09:41,137] INFO qdcr.trainer: [train] epoch=3 batch=10 loss=2.0769 acc=0.55 iou=0.15 objects=699
+[2026-04-19 09:10:02,832] INFO qdcr.trainer: [train] epoch=3 batch=20 loss=2.1395 acc=0.62 iou=0.13 objects=843
+[2026-04-19 09:10:26,033] INFO qdcr.trainer: [train] epoch=3 batch=30 loss=2.0551 acc=0.54 iou=0.17 objects=696
+[2026-04-19 09:10:26,098] INFO qdcr.trainer: [train] epoch=3 skipped validation eval_interval=5
+[2026-04-19 09:10:28,346] INFO qdcr.trainer: [train] epoch=4 batch=1 loss=2.0727 acc=0.52 iou=0.15 objects=647
+[2026-04-19 09:10:46,772] INFO qdcr.trainer: [train] epoch=4 batch=10 loss=2.1557 acc=0.58 iou=0.12 objects=790
+[2026-04-19 09:11:08,570] INFO qdcr.trainer: [train] epoch=4 batch=20 loss=2.1115 acc=0.54 iou=0.14 objects=698
+[2026-04-19 09:11:31,781] INFO qdcr.trainer: [train] epoch=4 batch=30 loss=2.1521 acc=0.50 iou=0.12 objects=705
+[2026-04-19 09:11:31,839] INFO qdcr.trainer: [train] epoch=4 skipped validation eval_interval=5
+[2026-04-19 09:11:34,241] INFO qdcr.trainer: [train] epoch=5 batch=1 loss=2.1150 acc=0.55 iou=0.14 objects=736
+[2026-04-19 09:11:52,595] INFO qdcr.trainer: [train] epoch=5 batch=10 loss=2.1389 acc=0.50 iou=0.12 objects=661
+[2026-04-19 09:12:14,198] INFO qdcr.trainer: [train] epoch=5 batch=20 loss=2.1246 acc=0.59 iou=0.14 objects=775
+[2026-04-19 09:12:37,489] INFO qdcr.trainer: [train] epoch=5 batch=30 loss=2.1107 acc=0.54 iou=0.15 objects=690
+[2026-04-19 09:14:16,300] INFO qdcr.trainer: [train] epoch=5 summary loss=2.1166 acc=0.56 iou=0.14 val_loss=2.2384 best=2.2384 best_epoch=5 wait=0/15 samples=21401
+[2026-04-19 09:14:18,967] INFO qdcr.trainer: [train] epoch=6 batch=1 loss=2.1126 acc=0.54 iou=0.13 objects=679
+[2026-04-19 09:14:40,146] INFO qdcr.trainer: [train] epoch=6 batch=10 loss=2.1413 acc=0.57 iou=0.12 objects=682
+[2026-04-19 09:15:03,739] INFO qdcr.trainer: [train] epoch=6 batch=20 loss=2.1099 acc=0.55 iou=0.14 objects=707
+[2026-04-19 09:15:27,232] INFO qdcr.trainer: [train] epoch=6 batch=30 loss=2.1042 acc=0.59 iou=0.14 objects=761
+[2026-04-19 09:15:27,300] INFO qdcr.trainer: [train] epoch=6 skipped validation eval_interval=5
+[2026-04-19 09:15:29,625] INFO qdcr.trainer: [train] epoch=7 batch=1 loss=2.1257 acc=0.56 iou=0.14 objects=720
+[2026-04-19 09:15:48,316] INFO qdcr.trainer: [train] epoch=7 batch=10 loss=2.1996 acc=0.54 iou=0.11 objects=755
+[2026-04-19 09:16:10,499] INFO qdcr.trainer: [train] epoch=7 batch=20 loss=2.1163 acc=0.59 iou=0.14 objects=808
+[2026-04-19 09:16:33,751] INFO qdcr.trainer: [train] epoch=7 batch=30 loss=2.1213 acc=0.60 iou=0.13 objects=708
+[2026-04-19 09:16:33,816] INFO qdcr.trainer: [train] epoch=7 skipped validation eval_interval=5
+[2026-04-19 09:16:36,197] INFO qdcr.trainer: [train] epoch=8 batch=1 loss=2.1261 acc=0.55 iou=0.13 objects=715
+[2026-04-19 09:16:54,495] INFO qdcr.trainer: [train] epoch=8 batch=10 loss=2.1746 acc=0.58 iou=0.11 objects=731
+[2026-04-19 09:17:16,437] INFO qdcr.trainer: [train] epoch=8 batch=20 loss=2.1043 acc=0.53 iou=0.14 objects=763
+[2026-04-19 09:17:39,664] INFO qdcr.trainer: [train] epoch=8 batch=30 loss=2.1201 acc=0.54 iou=0.13 objects=756
+[2026-04-19 09:17:39,731] INFO qdcr.trainer: [train] epoch=8 skipped validation eval_interval=5
+[2026-04-19 09:17:41,968] INFO qdcr.trainer: [train] epoch=9 batch=1 loss=2.0631 acc=0.64 iou=0.14 objects=694
+[2026-04-19 09:18:00,684] INFO qdcr.trainer: [train] epoch=9 batch=10 loss=2.0612 acc=0.57 iou=0.15 objects=678
+[2026-04-19 09:18:22,803] INFO qdcr.trainer: [train] epoch=9 batch=20 loss=2.1318 acc=0.55 iou=0.13 objects=718
+[2026-04-19 09:18:46,863] INFO qdcr.trainer: [train] epoch=9 batch=30 loss=2.1338 acc=0.54 iou=0.13 objects=722
+[2026-04-19 09:18:46,921] INFO qdcr.trainer: [train] epoch=9 skipped validation eval_interval=5
+[2026-04-19 09:18:49,302] INFO qdcr.trainer: [train] epoch=10 batch=1 loss=2.1288 acc=0.56 iou=0.13 objects=732
+[2026-04-19 09:19:08,134] INFO qdcr.trainer: [train] epoch=10 batch=10 loss=2.1513 acc=0.53 iou=0.13 objects=695
+[2026-04-19 09:19:30,668] INFO qdcr.trainer: [train] epoch=10 batch=20 loss=2.1484 acc=0.56 iou=0.13 objects=784
+[2026-04-19 09:19:54,514] INFO qdcr.trainer: [train] epoch=10 batch=30 loss=2.1000 acc=0.53 iou=0.14 objects=619
+[2026-04-19 09:21:33,582] INFO qdcr.trainer: [train] epoch=10 summary loss=2.1186 acc=0.56 iou=0.13 val_loss=2.2552 best=2.2384 best_epoch=5 wait=1/15 samples=21401
+[2026-04-19 09:21:36,212] INFO qdcr.trainer: [train] epoch=11 batch=1 loss=2.1116 acc=0.54 iou=0.14 objects=773
+[2026-04-19 09:21:57,929] INFO qdcr.trainer: [train] epoch=11 batch=10 loss=2.0774 acc=0.54 iou=0.15 objects=650
+[2026-04-19 09:22:22,050] INFO qdcr.trainer: [train] epoch=11 batch=20 loss=2.0817 acc=0.58 iou=0.15 objects=753
+[2026-04-19 09:22:45,852] INFO qdcr.trainer: [train] epoch=11 batch=30 loss=2.1376 acc=0.53 iou=0.12 objects=651
+[2026-04-19 09:22:45,911] INFO qdcr.trainer: [train] epoch=11 skipped validation eval_interval=5
+[2026-04-19 09:22:48,202] INFO qdcr.trainer: [train] epoch=12 batch=1 loss=2.1445 acc=0.53 iou=0.12 objects=730
+[2026-04-19 09:23:06,969] INFO qdcr.trainer: [train] epoch=12 batch=10 loss=2.0992 acc=0.61 iou=0.14 objects=695
+[2026-04-19 09:23:29,566] INFO qdcr.trainer: [train] epoch=12 batch=20 loss=2.1398 acc=0.53 iou=0.13 objects=686
+[2026-04-19 09:23:53,075] INFO qdcr.trainer: [train] epoch=12 batch=30 loss=2.1747 acc=0.54 iou=0.12 objects=699
+[2026-04-19 09:23:53,132] INFO qdcr.trainer: [train] epoch=12 skipped validation eval_interval=5
+[2026-04-19 09:23:55,442] INFO qdcr.trainer: [train] epoch=13 batch=1 loss=2.1528 acc=0.57 iou=0.12 objects=762
+[2026-04-19 09:24:14,119] INFO qdcr.trainer: [train] epoch=13 batch=10 loss=2.0662 acc=0.58 iou=0.16 objects=714
+[2026-04-19 09:24:36,915] INFO qdcr.trainer: [train] epoch=13 batch=20 loss=2.0854 acc=0.59 iou=0.14 objects=751
+[2026-04-19 09:25:00,218] INFO qdcr.trainer: [train] epoch=13 batch=30 loss=2.1095 acc=0.58 iou=0.13 objects=737
+[2026-04-19 09:25:00,287] INFO qdcr.trainer: [train] epoch=13 skipped validation eval_interval=5
+[2026-04-19 09:25:02,679] INFO qdcr.trainer: [train] epoch=14 batch=1 loss=2.0804 acc=0.57 iou=0.15 objects=723
+[2026-04-19 09:25:21,067] INFO qdcr.trainer: [train] epoch=14 batch=10 loss=2.0947 acc=0.64 iou=0.14 objects=762
+[2026-04-19 09:25:42,822] INFO qdcr.trainer: [train] epoch=14 batch=20 loss=2.1151 acc=0.50 iou=0.14 objects=705
+[2026-04-19 09:26:06,333] INFO qdcr.trainer: [train] epoch=14 batch=30 loss=2.1471 acc=0.58 iou=0.13 objects=763
+[2026-04-19 09:26:06,390] INFO qdcr.trainer: [train] epoch=14 skipped validation eval_interval=5
+[2026-04-19 09:26:08,851] INFO qdcr.trainer: [train] epoch=15 batch=1 loss=2.1125 acc=0.53 iou=0.14 objects=697
+[2026-04-19 09:26:28,450] INFO qdcr.trainer: [train] epoch=15 batch=10 loss=2.1316 acc=0.53 iou=0.14 objects=752
+[2026-04-19 09:26:50,205] INFO qdcr.trainer: [train] epoch=15 batch=20 loss=2.1419 acc=0.57 iou=0.12 objects=656
+[2026-04-19 09:27:14,427] INFO qdcr.trainer: [train] epoch=15 batch=30 loss=2.1275 acc=0.55 iou=0.14 objects=764
+[2026-04-19 09:28:56,887] INFO qdcr.trainer: [train] epoch=15 summary loss=2.1121 acc=0.56 iou=0.14 val_loss=2.2439 best=2.2384 best_epoch=5 wait=2/15 samples=21401
+[2026-04-19 09:28:59,523] INFO qdcr.trainer: [train] epoch=16 batch=1 loss=2.0978 acc=0.55 iou=0.15 objects=680
+[2026-04-19 09:29:21,024] INFO qdcr.trainer: [train] epoch=16 batch=10 loss=2.0393 acc=0.53 iou=0.17 objects=730
+[2026-04-19 09:29:44,913] INFO qdcr.trainer: [train] epoch=16 batch=20 loss=2.1033 acc=0.57 iou=0.14 objects=677
+[2026-04-19 09:30:12,840] INFO qdcr.trainer: [train] epoch=16 batch=30 loss=2.1503 acc=0.51 iou=0.12 objects=683
+[2026-04-19 09:30:12,900] INFO qdcr.trainer: [train] epoch=16 skipped validation eval_interval=5
+[2026-04-19 09:30:15,306] INFO qdcr.trainer: [train] epoch=17 batch=1 loss=2.1454 acc=0.60 iou=0.12 objects=739
+[2026-04-19 09:30:33,903] INFO qdcr.trainer: [train] epoch=17 batch=10 loss=2.1300 acc=0.55 iou=0.13 objects=692
+[2026-04-19 09:30:56,729] INFO qdcr.trainer: [train] epoch=17 batch=20 loss=2.0595 acc=0.55 iou=0.15 objects=625
+[2026-04-19 09:31:20,133] INFO qdcr.trainer: [train] epoch=17 batch=30 loss=2.0819 acc=0.58 iou=0.14 objects=591
+[2026-04-19 09:31:20,192] INFO qdcr.trainer: [train] epoch=17 skipped validation eval_interval=5
+[2026-04-19 09:31:22,548] INFO qdcr.trainer: [train] epoch=18 batch=1 loss=2.0841 acc=0.57 iou=0.16 objects=750
+[2026-04-19 09:31:41,773] INFO qdcr.trainer: [train] epoch=18 batch=10 loss=2.1004 acc=0.57 iou=0.14 objects=678
+[2026-04-19 09:32:04,278] INFO qdcr.trainer: [train] epoch=18 batch=20 loss=2.1185 acc=0.50 iou=0.14 objects=699
+[2026-04-19 09:32:28,012] INFO qdcr.trainer: [train] epoch=18 batch=30 loss=2.1281 acc=0.58 iou=0.14 objects=747
+[2026-04-19 09:32:28,089] INFO qdcr.trainer: [train] epoch=18 skipped validation eval_interval=5
+[2026-04-19 09:32:30,557] INFO qdcr.trainer: [train] epoch=19 batch=1 loss=2.1249 acc=0.62 iou=0.13 objects=758
+[2026-04-19 09:32:49,102] INFO qdcr.trainer: [train] epoch=19 batch=10 loss=2.1344 acc=0.55 iou=0.12 objects=629
+[2026-04-19 09:33:11,486] INFO qdcr.trainer: [train] epoch=19 batch=20 loss=2.1082 acc=0.66 iou=0.13 objects=785
+[2026-04-19 09:33:35,272] INFO qdcr.trainer: [train] epoch=19 batch=30 loss=2.1107 acc=0.55 iou=0.15 objects=702
+[2026-04-19 09:33:35,328] INFO qdcr.trainer: [train] epoch=19 skipped validation eval_interval=5
+[2026-04-19 09:33:37,672] INFO qdcr.trainer: [train] epoch=20 batch=1 loss=2.1066 acc=0.54 iou=0.15 objects=758
+[2026-04-19 09:33:57,090] INFO qdcr.trainer: [train] epoch=20 batch=10 loss=2.0961 acc=0.53 iou=0.14 objects=667
+[2026-04-19 09:34:19,353] INFO qdcr.trainer: [train] epoch=20 batch=20 loss=2.0836 acc=0.56 iou=0.15 objects=743
+[2026-04-19 09:34:42,636] INFO qdcr.trainer: [train] epoch=20 batch=30 loss=2.1606 acc=0.55 iou=0.12 objects=696
+[2026-04-19 09:36:20,487] INFO qdcr.trainer: [train] epoch=20 summary loss=2.1129 acc=0.56 iou=0.14 val_loss=2.2590 best=2.2384 best_epoch=5 wait=3/15 samples=21401
+[2026-04-19 09:36:23,146] INFO qdcr.trainer: [train] epoch=21 batch=1 loss=2.1182 acc=0.60 iou=0.13 objects=717
+[2026-04-19 09:36:44,855] INFO qdcr.trainer: [train] epoch=21 batch=10 loss=2.1237 acc=0.55 iou=0.13 objects=702
+[2026-04-19 09:37:08,847] INFO qdcr.trainer: [train] epoch=21 batch=20 loss=2.1083 acc=0.62 iou=0.13 objects=729
+[2026-04-19 09:37:32,631] INFO qdcr.trainer: [train] epoch=21 batch=30 loss=2.1130 acc=0.54 iou=0.13 objects=665
+[2026-04-19 09:37:32,701] INFO qdcr.trainer: [train] epoch=21 skipped validation eval_interval=5
+[2026-04-19 09:37:35,021] INFO qdcr.trainer: [train] epoch=22 batch=1 loss=2.1535 acc=0.53 iou=0.12 objects=715
+[2026-04-19 09:37:53,687] INFO qdcr.trainer: [train] epoch=22 batch=10 loss=2.0687 acc=0.57 iou=0.15 objects=654
+[2026-04-19 09:38:15,668] INFO qdcr.trainer: [train] epoch=22 batch=20 loss=2.1234 acc=0.54 iou=0.13 objects=669
+[2026-04-19 09:38:39,540] INFO qdcr.trainer: [train] epoch=22 batch=30 loss=2.0687 acc=0.58 iou=0.14 objects=631
+[2026-04-19 09:38:39,608] INFO qdcr.trainer: [train] epoch=22 skipped validation eval_interval=5
+[2026-04-19 09:38:41,984] INFO qdcr.trainer: [train] epoch=23 batch=1 loss=2.1734 acc=0.55 iou=0.12 objects=740
+[2026-04-19 09:39:00,502] INFO qdcr.trainer: [train] epoch=23 batch=10 loss=2.0959 acc=0.59 iou=0.14 objects=746
+[2026-04-19 09:39:22,886] INFO qdcr.trainer: [train] epoch=23 batch=20 loss=2.0488 acc=0.66 iou=0.15 objects=731
+[2026-04-19 09:39:46,429] INFO qdcr.trainer: [train] epoch=23 batch=30 loss=2.1207 acc=0.54 iou=0.12 objects=616
+[2026-04-19 09:39:46,496] INFO qdcr.trainer: [train] epoch=23 skipped validation eval_interval=5
+[2026-04-19 09:39:48,844] INFO qdcr.trainer: [train] epoch=24 batch=1 loss=2.0878 acc=0.62 iou=0.15 objects=813
+[2026-04-19 09:40:07,862] INFO qdcr.trainer: [train] epoch=24 batch=10 loss=2.0289 acc=0.60 iou=0.16 objects=696
+[2026-04-19 09:40:30,189] INFO qdcr.trainer: [train] epoch=24 batch=20 loss=2.0700 acc=0.58 iou=0.15 objects=760
+[2026-04-19 09:40:53,814] INFO qdcr.trainer: [train] epoch=24 batch=30 loss=2.1043 acc=0.59 iou=0.15 objects=821
+[2026-04-19 09:40:53,878] INFO qdcr.trainer: [train] epoch=24 skipped validation eval_interval=5
+[2026-04-19 09:40:56,275] INFO qdcr.trainer: [train] epoch=25 batch=1 loss=2.0803 acc=0.62 iou=0.15 objects=743
+[2026-04-19 09:41:15,086] INFO qdcr.trainer: [train] epoch=25 batch=10 loss=2.0860 acc=0.55 iou=0.15 objects=701
+[2026-04-19 09:41:37,594] INFO qdcr.trainer: [train] epoch=25 batch=20 loss=2.1443 acc=0.54 iou=0.13 objects=714
+[2026-04-19 09:42:01,322] INFO qdcr.trainer: [train] epoch=25 batch=30 loss=2.0845 acc=0.55 iou=0.14 objects=691
+[2026-04-19 09:43:41,753] INFO qdcr.trainer: [train] epoch=25 summary loss=2.1080 acc=0.56 iou=0.14 val_loss=2.2399 best=2.2384 best_epoch=5 wait=4/15 samples=21401
+[2026-04-19 09:43:44,434] INFO qdcr.trainer: [train] epoch=26 batch=1 loss=2.1503 acc=0.57 iou=0.12 objects=763
+[2026-04-19 09:44:06,239] INFO qdcr.trainer: [train] epoch=26 batch=10 loss=2.1560 acc=0.59 iou=0.11 objects=703
+[2026-04-19 09:44:30,017] INFO qdcr.trainer: [train] epoch=26 batch=20 loss=2.0767 acc=0.58 iou=0.14 objects=645
+[2026-04-19 09:44:54,115] INFO qdcr.trainer: [train] epoch=26 batch=30 loss=2.0239 acc=0.60 iou=0.17 objects=752
+[2026-04-19 09:44:54,176] INFO qdcr.trainer: [train] epoch=26 skipped validation eval_interval=5
+[2026-04-19 09:44:56,664] INFO qdcr.trainer: [train] epoch=27 batch=1 loss=2.1075 acc=0.54 iou=0.14 objects=766
+[2026-04-19 09:45:15,712] INFO qdcr.trainer: [train] epoch=27 batch=10 loss=2.1401 acc=0.57 iou=0.13 objects=785
+[2026-04-19 09:45:37,739] INFO qdcr.trainer: [train] epoch=27 batch=20 loss=2.1451 acc=0.53 iou=0.13 objects=804
+[2026-04-19 09:46:01,326] INFO qdcr.trainer: [train] epoch=27 batch=30 loss=2.0258 acc=0.61 iou=0.16 objects=696
+[2026-04-19 09:46:01,397] INFO qdcr.trainer: [train] epoch=27 skipped validation eval_interval=5
+[2026-04-19 09:46:03,661] INFO qdcr.trainer: [train] epoch=28 batch=1 loss=2.1127 acc=0.54 iou=0.14 objects=675
+[2026-04-19 09:46:22,584] INFO qdcr.trainer: [train] epoch=28 batch=10 loss=2.1228 acc=0.56 iou=0.14 objects=713
+[2026-04-19 09:46:44,822] INFO qdcr.trainer: [train] epoch=28 batch=20 loss=2.0499 acc=0.57 iou=0.16 objects=733
+[2026-04-19 09:47:08,769] INFO qdcr.trainer: [train] epoch=28 batch=30 loss=2.1272 acc=0.53 iou=0.14 objects=699
+[2026-04-19 09:47:08,844] INFO qdcr.trainer: [train] epoch=28 skipped validation eval_interval=5
+[2026-04-19 09:47:11,384] INFO qdcr.trainer: [train] epoch=29 batch=1 loss=2.0561 acc=0.54 iou=0.17 objects=680
+[2026-04-19 09:47:30,339] INFO qdcr.trainer: [train] epoch=29 batch=10 loss=2.0606 acc=0.57 iou=0.15 objects=645
+[2026-04-19 09:47:52,768] INFO qdcr.trainer: [train] epoch=29 batch=20 loss=2.0921 acc=0.58 iou=0.14 objects=672
+[2026-04-19 09:48:16,370] INFO qdcr.trainer: [train] epoch=29 batch=30 loss=2.1315 acc=0.59 iou=0.13 objects=690
+[2026-04-19 09:48:16,446] INFO qdcr.trainer: [train] epoch=29 skipped validation eval_interval=5
+[2026-04-19 09:48:18,869] INFO qdcr.trainer: [train] epoch=30 batch=1 loss=2.0501 acc=0.59 iou=0.15 objects=725
+[2026-04-19 09:48:37,906] INFO qdcr.trainer: [train] epoch=30 batch=10 loss=2.1260 acc=0.55 iou=0.12 objects=661
+[2026-04-19 09:48:59,736] INFO qdcr.trainer: [train] epoch=30 batch=20 loss=2.0519 acc=0.60 iou=0.15 objects=664
+[2026-04-19 09:49:23,683] INFO qdcr.trainer: [train] epoch=30 batch=30 loss=2.1228 acc=0.55 iou=0.15 objects=784
+[2026-04-19 09:51:01,974] INFO qdcr.trainer: [train] epoch=30 summary loss=2.1107 acc=0.56 iou=0.14 val_loss=2.2430 best=2.2384 best_epoch=5 wait=5/15 samples=21401
+[2026-04-19 09:51:04,704] INFO qdcr.trainer: [train] epoch=31 batch=1 loss=2.1007 acc=0.52 iou=0.14 objects=650
+[2026-04-19 09:51:26,183] INFO qdcr.trainer: [train] epoch=31 batch=10 loss=2.0924 acc=0.59 iou=0.13 objects=656
+[2026-04-19 09:51:49,925] INFO qdcr.trainer: [train] epoch=31 batch=20 loss=2.1402 acc=0.51 iou=0.14 objects=640
+[2026-04-19 09:52:14,405] INFO qdcr.trainer: [train] epoch=31 batch=30 loss=2.1490 acc=0.58 iou=0.14 objects=816
+[2026-04-19 09:52:14,475] INFO qdcr.trainer: [train] epoch=31 skipped validation eval_interval=5
+[2026-04-19 09:52:16,833] INFO qdcr.trainer: [train] epoch=32 batch=1 loss=2.1336 acc=0.58 iou=0.13 objects=775
+[2026-04-19 09:52:35,411] INFO qdcr.trainer: [train] epoch=32 batch=10 loss=2.1649 acc=0.59 iou=0.12 objects=776
+[2026-04-19 09:52:57,891] INFO qdcr.trainer: [train] epoch=32 batch=20 loss=2.1029 acc=0.59 iou=0.13 objects=724
+[2026-04-19 09:53:21,352] INFO qdcr.trainer: [train] epoch=32 batch=30 loss=2.0605 acc=0.57 iou=0.15 objects=707
+[2026-04-19 09:53:21,413] INFO qdcr.trainer: [train] epoch=32 skipped validation eval_interval=5
+[2026-04-19 09:53:23,712] INFO qdcr.trainer: [train] epoch=33 batch=1 loss=2.0161 acc=0.58 iou=0.17 objects=664
+[2026-04-19 09:53:43,308] INFO qdcr.trainer: [train] epoch=33 batch=10 loss=2.1293 acc=0.56 iou=0.12 objects=714
+[2026-04-19 09:54:06,159] INFO qdcr.trainer: [train] epoch=33 batch=20 loss=2.1038 acc=0.62 iou=0.13 objects=733
+[2026-04-19 09:54:29,717] INFO qdcr.trainer: [train] epoch=33 batch=30 loss=2.1132 acc=0.64 iou=0.13 objects=737
+[2026-04-19 09:54:29,777] INFO qdcr.trainer: [train] epoch=33 skipped validation eval_interval=5
+[2026-04-19 09:54:32,204] INFO qdcr.trainer: [train] epoch=34 batch=1 loss=2.0582 acc=0.63 iou=0.15 objects=715
+[2026-04-19 09:54:51,528] INFO qdcr.trainer: [train] epoch=34 batch=10 loss=2.0563 acc=0.62 iou=0.14 objects=651
+[2026-04-19 09:55:13,981] INFO qdcr.trainer: [train] epoch=34 batch=20 loss=2.1401 acc=0.55 iou=0.12 objects=717
+[2026-04-19 09:55:37,814] INFO qdcr.trainer: [train] epoch=34 batch=30 loss=2.1263 acc=0.59 iou=0.13 objects=736
+[2026-04-19 09:55:37,871] INFO qdcr.trainer: [train] epoch=34 skipped validation eval_interval=5
+[2026-04-19 09:55:40,245] INFO qdcr.trainer: [train] epoch=35 batch=1 loss=2.1682 acc=0.53 iou=0.11 objects=672
+[2026-04-19 09:55:59,224] INFO qdcr.trainer: [train] epoch=35 batch=10 loss=2.0798 acc=0.55 iou=0.15 objects=694
+[2026-04-19 09:56:21,703] INFO qdcr.trainer: [train] epoch=35 batch=20 loss=2.1060 acc=0.54 iou=0.14 objects=657
+[2026-04-19 09:56:45,187] INFO qdcr.trainer: [train] epoch=35 batch=30 loss=2.1193 acc=0.53 iou=0.13 objects=641
+[2026-04-19 09:58:24,992] INFO qdcr.trainer: [train] epoch=35 summary loss=2.1077 acc=0.56 iou=0.14 val_loss=2.2415 best=2.2384 best_epoch=5 wait=6/15 samples=21401
+[2026-04-19 09:58:27,616] INFO qdcr.trainer: [train] epoch=36 batch=1 loss=2.1564 acc=0.51 iou=0.11 objects=608
+[2026-04-19 09:58:48,961] INFO qdcr.trainer: [train] epoch=36 batch=10 loss=2.0978 acc=0.56 iou=0.14 objects=677
+[2026-04-19 09:59:12,615] INFO qdcr.trainer: [train] epoch=36 batch=20 loss=2.0703 acc=0.57 iou=0.14 objects=684
+[2026-04-19 09:59:36,618] INFO qdcr.trainer: [train] epoch=36 batch=30 loss=2.0974 acc=0.58 iou=0.14 objects=671
+[2026-04-19 09:59:36,676] INFO qdcr.trainer: [train] epoch=36 skipped validation eval_interval=5
+[2026-04-19 09:59:38,965] INFO qdcr.trainer: [train] epoch=37 batch=1 loss=2.0991 acc=0.56 iou=0.14 objects=671
+[2026-04-19 09:59:57,767] INFO qdcr.trainer: [train] epoch=37 batch=10 loss=2.0637 acc=0.63 iou=0.15 objects=719
+[2026-04-19 10:00:19,631] INFO qdcr.trainer: [train] epoch=37 batch=20 loss=2.1500 acc=0.57 iou=0.12 objects=711
+[2026-04-19 10:00:43,801] INFO qdcr.trainer: [train] epoch=37 batch=30 loss=2.0946 acc=0.59 iou=0.13 objects=668
+[2026-04-19 10:00:43,860] INFO qdcr.trainer: [train] epoch=37 skipped validation eval_interval=5
+[2026-04-19 10:00:46,293] INFO qdcr.trainer: [train] epoch=38 batch=1 loss=2.0610 acc=0.63 iou=0.15 objects=766
+[2026-04-19 10:01:05,221] INFO qdcr.trainer: [train] epoch=38 batch=10 loss=2.1359 acc=0.57 iou=0.12 objects=710
+[2026-04-19 10:01:27,786] INFO qdcr.trainer: [train] epoch=38 batch=20 loss=2.1853 acc=0.47 iou=0.12 objects=732
+[2026-04-19 10:01:51,258] INFO qdcr.trainer: [train] epoch=38 batch=30 loss=2.1135 acc=0.56 iou=0.14 objects=708
+[2026-04-19 10:01:51,332] INFO qdcr.trainer: [train] epoch=38 skipped validation eval_interval=5
+[2026-04-19 10:01:53,694] INFO qdcr.trainer: [train] epoch=39 batch=1 loss=2.0911 acc=0.59 iou=0.14 objects=710
+[2026-04-19 10:02:12,813] INFO qdcr.trainer: [train] epoch=39 batch=10 loss=2.0522 acc=0.60 iou=0.16 objects=761
+[2026-04-19 10:02:35,739] INFO qdcr.trainer: [train] epoch=39 batch=20 loss=2.0620 acc=0.58 iou=0.15 objects=723
+[2026-04-19 10:02:59,455] INFO qdcr.trainer: [train] epoch=39 batch=30 loss=2.0817 acc=0.53 iou=0.15 objects=741
+[2026-04-19 10:02:59,537] INFO qdcr.trainer: [train] epoch=39 skipped validation eval_interval=5
+[2026-04-19 10:03:01,854] INFO qdcr.trainer: [train] epoch=40 batch=1 loss=2.1153 acc=0.56 iou=0.14 objects=772
+[2026-04-19 10:03:21,076] INFO qdcr.trainer: [train] epoch=40 batch=10 loss=2.1054 acc=0.55 iou=0.14 objects=710
+[2026-04-19 10:03:43,834] INFO qdcr.trainer: [train] epoch=40 batch=20 loss=2.1325 acc=0.62 iou=0.12 objects=816
+[2026-04-19 10:04:07,849] INFO qdcr.trainer: [train] epoch=40 batch=30 loss=2.1088 acc=0.54 iou=0.15 objects=762
+[2026-04-19 10:05:47,272] INFO qdcr.trainer: [train] epoch=40 summary loss=2.1021 acc=0.57 iou=0.14 val_loss=2.2523 best=2.2384 best_epoch=5 wait=7/15 samples=21401
+[2026-04-19 10:05:49,918] INFO qdcr.trainer: [train] epoch=41 batch=1 loss=2.0803 acc=0.52 iou=0.15 objects=690
+[2026-04-19 10:06:11,354] INFO qdcr.trainer: [train] epoch=41 batch=10 loss=2.0925 acc=0.56 iou=0.14 objects=635
+[2026-04-19 10:06:35,664] INFO qdcr.trainer: [train] epoch=41 batch=20 loss=2.1205 acc=0.58 iou=0.14 objects=743
+[2026-04-19 10:06:59,403] INFO qdcr.trainer: [train] epoch=41 batch=30 loss=2.0414 acc=0.61 iou=0.17 objects=756
+[2026-04-19 10:06:59,462] INFO qdcr.trainer: [train] epoch=41 skipped validation eval_interval=5
+[2026-04-19 10:07:01,877] INFO qdcr.trainer: [train] epoch=42 batch=1 loss=2.0775 acc=0.52 iou=0.15 objects=664
+[2026-04-19 10:07:20,973] INFO qdcr.trainer: [train] epoch=42 batch=10 loss=2.1244 acc=0.60 iou=0.12 objects=695
+[2026-04-19 10:07:42,714] INFO qdcr.trainer: [train] epoch=42 batch=20 loss=2.0679 acc=0.59 iou=0.15 objects=784
+[2026-04-19 10:08:06,232] INFO qdcr.trainer: [train] epoch=42 batch=30 loss=2.0808 acc=0.57 iou=0.14 objects=675
+[2026-04-19 10:08:06,291] INFO qdcr.trainer: [train] epoch=42 skipped validation eval_interval=5
+[2026-04-19 10:08:08,768] INFO qdcr.trainer: [train] epoch=43 batch=1 loss=2.0686 acc=0.57 iou=0.14 objects=655
+[2026-04-19 10:08:27,479] INFO qdcr.trainer: [train] epoch=43 batch=10 loss=2.0934 acc=0.57 iou=0.14 objects=709
+[2026-04-19 10:08:49,850] INFO qdcr.trainer: [train] epoch=43 batch=20 loss=2.0707 acc=0.54 iou=0.15 objects=669
+[2026-04-19 10:09:14,158] INFO qdcr.trainer: [train] epoch=43 batch=30 loss=2.1098 acc=0.51 iou=0.14 objects=672
+[2026-04-19 10:09:14,218] INFO qdcr.trainer: [train] epoch=43 skipped validation eval_interval=5
+[2026-04-19 10:09:16,675] INFO qdcr.trainer: [train] epoch=44 batch=1 loss=2.1399 acc=0.58 iou=0.12 objects=712
+[2026-04-19 10:09:35,811] INFO qdcr.trainer: [train] epoch=44 batch=10 loss=2.1046 acc=0.57 iou=0.14 objects=714
+[2026-04-19 10:09:58,377] INFO qdcr.trainer: [train] epoch=44 batch=20 loss=2.0561 acc=0.56 iou=0.16 objects=692
+[2026-04-19 10:10:22,302] INFO qdcr.trainer: [train] epoch=44 batch=30 loss=2.1054 acc=0.58 iou=0.14 objects=813
+[2026-04-19 10:10:22,359] INFO qdcr.trainer: [train] epoch=44 skipped validation eval_interval=5
+[2026-04-19 10:10:24,813] INFO qdcr.trainer: [train] epoch=45 batch=1 loss=2.0805 acc=0.61 iou=0.14 objects=764
+[2026-04-19 10:10:43,743] INFO qdcr.trainer: [train] epoch=45 batch=10 loss=2.1074 acc=0.50 iou=0.14 objects=697
+[2026-04-19 10:11:05,882] INFO qdcr.trainer: [train] epoch=45 batch=20 loss=2.0875 acc=0.60 iou=0.14 objects=730
+[2026-04-19 10:11:29,725] INFO qdcr.trainer: [train] epoch=45 batch=30 loss=2.1223 acc=0.54 iou=0.13 objects=707
+[2026-04-19 10:13:10,192] INFO qdcr.trainer: [train] epoch=45 summary loss=2.0977 acc=0.57 iou=0.14 val_loss=2.2311 best=2.2311 best_epoch=45 wait=0/15 samples=21401
+[2026-04-19 10:13:12,861] INFO qdcr.trainer: [train] epoch=46 batch=1 loss=2.0719 acc=0.61 iou=0.15 objects=769
+[2026-04-19 10:13:35,017] INFO qdcr.trainer: [train] epoch=46 batch=10 loss=2.1842 acc=0.54 iou=0.11 objects=671
+[2026-04-19 10:13:59,400] INFO qdcr.trainer: [train] epoch=46 batch=20 loss=2.1649 acc=0.62 iou=0.11 objects=795
+[2026-04-19 10:14:23,002] INFO qdcr.trainer: [train] epoch=46 batch=30 loss=2.1155 acc=0.55 iou=0.13 objects=745
+[2026-04-19 10:14:23,098] INFO qdcr.trainer: [train] epoch=46 skipped validation eval_interval=5
+[2026-04-19 10:14:25,454] INFO qdcr.trainer: [train] epoch=47 batch=1 loss=2.0574 acc=0.57 iou=0.15 objects=671
+[2026-04-19 10:14:44,415] INFO qdcr.trainer: [train] epoch=47 batch=10 loss=2.0434 acc=0.64 iou=0.15 objects=672
+[2026-04-19 10:15:06,757] INFO qdcr.trainer: [train] epoch=47 batch=20 loss=2.0843 acc=0.57 iou=0.15 objects=683
+[2026-04-19 10:15:30,431] INFO qdcr.trainer: [train] epoch=47 batch=30 loss=2.1486 acc=0.54 iou=0.13 objects=741
+[2026-04-19 10:15:30,502] INFO qdcr.trainer: [train] epoch=47 skipped validation eval_interval=5
+[2026-04-19 10:15:32,896] INFO qdcr.trainer: [train] epoch=48 batch=1 loss=2.1398 acc=0.60 iou=0.13 objects=742
+[2026-04-19 10:15:52,157] INFO qdcr.trainer: [train] epoch=48 batch=10 loss=2.0716 acc=0.60 iou=0.15 objects=751
+[2026-04-19 10:16:15,006] INFO qdcr.trainer: [train] epoch=48 batch=20 loss=2.1103 acc=0.55 iou=0.14 objects=717
+[2026-04-19 10:16:38,547] INFO qdcr.trainer: [train] epoch=48 batch=30 loss=2.0941 acc=0.57 iou=0.15 objects=720
+[2026-04-19 10:16:38,606] INFO qdcr.trainer: [train] epoch=48 skipped validation eval_interval=5
+[2026-04-19 10:16:41,136] INFO qdcr.trainer: [train] epoch=49 batch=1 loss=2.1058 acc=0.61 iou=0.13 objects=754
+[2026-04-19 10:17:00,327] INFO qdcr.trainer: [train] epoch=49 batch=10 loss=2.1294 acc=0.57 iou=0.14 objects=818
+[2026-04-19 10:17:22,311] INFO qdcr.trainer: [train] epoch=49 batch=20 loss=2.0858 acc=0.54 iou=0.15 objects=769
+[2026-04-19 10:17:46,198] INFO qdcr.trainer: [train] epoch=49 batch=30 loss=2.0541 acc=0.61 iou=0.16 objects=801
+[2026-04-19 10:17:46,267] INFO qdcr.trainer: [train] epoch=49 skipped validation eval_interval=5
+[2026-04-19 10:17:48,676] INFO qdcr.trainer: [train] epoch=50 batch=1 loss=2.0261 acc=0.61 iou=0.17 objects=733
+[2026-04-19 10:18:08,197] INFO qdcr.trainer: [train] epoch=50 batch=10 loss=2.0880 acc=0.60 iou=0.13 objects=675
+[2026-04-19 10:18:30,160] INFO qdcr.trainer: [train] epoch=50 batch=20 loss=2.0969 acc=0.54 iou=0.15 objects=801
+[2026-04-19 10:18:54,130] INFO qdcr.trainer: [train] epoch=50 batch=30 loss=2.0921 acc=0.53 iou=0.15 objects=714
+[2026-04-19 10:20:33,512] INFO qdcr.trainer: [train] epoch=50 summary loss=2.0992 acc=0.57 iou=0.14 val_loss=2.2551 best=2.2311 best_epoch=45 wait=1/15 samples=21401
+[2026-04-19 10:20:36,430] INFO qdcr.trainer: [train] epoch=51 batch=1 loss=2.0667 acc=0.56 iou=0.16 objects=668
+[2026-04-19 10:20:57,652] INFO qdcr.trainer: [train] epoch=51 batch=10 loss=2.1506 acc=0.54 iou=0.11 objects=705
+[2026-04-19 10:21:21,939] INFO qdcr.trainer: [train] epoch=51 batch=20 loss=2.1153 acc=0.56 iou=0.14 objects=736
+[2026-04-19 10:21:46,277] INFO qdcr.trainer: [train] epoch=51 batch=30 loss=2.0977 acc=0.64 iou=0.13 objects=687
+[2026-04-19 10:21:46,351] INFO qdcr.trainer: [train] epoch=51 skipped validation eval_interval=5
+[2026-04-19 10:21:48,734] INFO qdcr.trainer: [train] epoch=52 batch=1 loss=2.1409 acc=0.60 iou=0.13 objects=809
+[2026-04-19 10:22:07,557] INFO qdcr.trainer: [train] epoch=52 batch=10 loss=2.1009 acc=0.59 iou=0.14 objects=751
+[2026-04-19 10:22:29,928] INFO qdcr.trainer: [train] epoch=52 batch=20 loss=2.1392 acc=0.48 iou=0.13 objects=710
+[2026-04-19 10:22:53,838] INFO qdcr.trainer: [train] epoch=52 batch=30 loss=2.1358 acc=0.52 iou=0.12 objects=659
+[2026-04-19 10:22:53,901] INFO qdcr.trainer: [train] epoch=52 skipped validation eval_interval=5
+[2026-04-19 10:22:56,204] INFO qdcr.trainer: [train] epoch=53 batch=1 loss=2.1292 acc=0.55 iou=0.13 objects=784
+[2026-04-19 10:23:21,532] INFO qdcr.trainer: [train] epoch=53 batch=10 loss=2.0542 acc=0.57 iou=0.15 objects=661
+[2026-04-19 10:23:43,676] INFO qdcr.trainer: [train] epoch=53 batch=20 loss=2.1294 acc=0.59 iou=0.13 objects=799
+[2026-04-19 10:24:07,569] INFO qdcr.trainer: [train] epoch=53 batch=30 loss=2.1388 acc=0.56 iou=0.13 objects=733
+[2026-04-19 10:24:07,630] INFO qdcr.trainer: [train] epoch=53 skipped validation eval_interval=5
+[2026-04-19 10:24:10,085] INFO qdcr.trainer: [train] epoch=54 batch=1 loss=2.0862 acc=0.60 iou=0.15 objects=752
+[2026-04-19 10:24:29,263] INFO qdcr.trainer: [train] epoch=54 batch=10 loss=2.1383 acc=0.57 iou=0.13 objects=688
+[2026-04-19 10:24:51,873] INFO qdcr.trainer: [train] epoch=54 batch=20 loss=2.1121 acc=0.60 iou=0.14 objects=830
+[2026-04-19 10:25:15,771] INFO qdcr.trainer: [train] epoch=54 batch=30 loss=2.1033 acc=0.58 iou=0.14 objects=688
+[2026-04-19 10:25:15,831] INFO qdcr.trainer: [train] epoch=54 skipped validation eval_interval=5
+[2026-04-19 10:25:18,167] INFO qdcr.trainer: [train] epoch=55 batch=1 loss=2.0879 acc=0.57 iou=0.14 objects=703
+[2026-04-19 10:25:36,814] INFO qdcr.trainer: [train] epoch=55 batch=10 loss=2.0500 acc=0.60 iou=0.15 objects=705
+[2026-04-19 10:25:59,334] INFO qdcr.trainer: [train] epoch=55 batch=20 loss=2.1504 acc=0.58 iou=0.11 objects=667
+[2026-04-19 10:26:22,909] INFO qdcr.trainer: [train] epoch=55 batch=30 loss=2.1175 acc=0.52 iou=0.14 objects=712
+[2026-04-19 10:28:03,509] INFO qdcr.trainer: [train] epoch=55 summary loss=2.0934 acc=0.57 iou=0.14 val_loss=2.2350 best=2.2311 best_epoch=45 wait=2/15 samples=21401
+[2026-04-19 10:28:06,123] INFO qdcr.trainer: [train] epoch=56 batch=1 loss=2.0980 acc=0.54 iou=0.15 objects=785
+[2026-04-19 10:28:28,206] INFO qdcr.trainer: [train] epoch=56 batch=10 loss=2.1567 acc=0.53 iou=0.12 objects=678
+[2026-04-19 10:28:52,310] INFO qdcr.trainer: [train] epoch=56 batch=20 loss=2.1573 acc=0.56 iou=0.13 objects=713
+[2026-04-19 10:29:15,890] INFO qdcr.trainer: [train] epoch=56 batch=30 loss=2.0905 acc=0.57 iou=0.15 objects=721
+[2026-04-19 10:29:15,947] INFO qdcr.trainer: [train] epoch=56 skipped validation eval_interval=5
+[2026-04-19 10:29:18,419] INFO qdcr.trainer: [train] epoch=57 batch=1 loss=2.0747 acc=0.56 iou=0.15 objects=657
+[2026-04-19 10:29:37,393] INFO qdcr.trainer: [train] epoch=57 batch=10 loss=2.1309 acc=0.62 iou=0.12 objects=719
+[2026-04-19 10:30:00,130] INFO qdcr.trainer: [train] epoch=57 batch=20 loss=2.0916 acc=0.62 iou=0.12 objects=729
+[2026-04-19 10:30:23,866] INFO qdcr.trainer: [train] epoch=57 batch=30 loss=2.0479 acc=0.58 iou=0.16 objects=669
+[2026-04-19 10:30:23,924] INFO qdcr.trainer: [train] epoch=57 skipped validation eval_interval=5
+[2026-04-19 10:30:26,209] INFO qdcr.trainer: [train] epoch=58 batch=1 loss=2.0722 acc=0.60 iou=0.15 objects=688
+[2026-04-19 10:30:45,373] INFO qdcr.trainer: [train] epoch=58 batch=10 loss=2.1330 acc=0.58 iou=0.14 objects=830
+[2026-04-19 10:31:07,929] INFO qdcr.trainer: [train] epoch=58 batch=20 loss=2.0244 acc=0.63 iou=0.15 objects=693
+[2026-04-19 10:31:31,447] INFO qdcr.trainer: [train] epoch=58 batch=30 loss=2.1129 acc=0.55 iou=0.13 objects=678
+[2026-04-19 10:31:31,527] INFO qdcr.trainer: [train] epoch=58 skipped validation eval_interval=5
+[2026-04-19 10:31:33,831] INFO qdcr.trainer: [train] epoch=59 batch=1 loss=2.1050 acc=0.52 iou=0.16 objects=763
+[2026-04-19 10:31:52,993] INFO qdcr.trainer: [train] epoch=59 batch=10 loss=2.0583 acc=0.59 iou=0.15 objects=727
+[2026-04-19 10:32:15,601] INFO qdcr.trainer: [train] epoch=59 batch=20 loss=2.0893 acc=0.57 iou=0.15 objects=739
+[2026-04-19 10:32:39,366] INFO qdcr.trainer: [train] epoch=59 batch=30 loss=2.0570 acc=0.62 iou=0.15 objects=713
+[2026-04-19 10:32:39,425] INFO qdcr.trainer: [train] epoch=59 skipped validation eval_interval=5
+[2026-04-19 10:32:41,778] INFO qdcr.trainer: [train] epoch=60 batch=1 loss=2.0571 acc=0.59 iou=0.15 objects=718
+[2026-04-19 10:33:00,693] INFO qdcr.trainer: [train] epoch=60 batch=10 loss=2.0161 acc=0.56 iou=0.17 objects=702
+[2026-04-19 10:33:22,940] INFO qdcr.trainer: [train] epoch=60 batch=20 loss=2.1104 acc=0.60 iou=0.13 objects=772
+[2026-04-19 10:33:46,744] INFO qdcr.trainer: [train] epoch=60 batch=30 loss=2.0817 acc=0.59 iou=0.15 objects=788
+[2026-04-19 10:35:27,810] INFO qdcr.trainer: [train] epoch=60 summary loss=2.0917 acc=0.57 iou=0.14 val_loss=2.2284 best=2.2284 best_epoch=60 wait=0/15 samples=21401
+[2026-04-19 10:35:30,451] INFO qdcr.trainer: [train] epoch=61 batch=1 loss=2.0814 acc=0.60 iou=0.15 objects=713
+[2026-04-19 10:35:51,680] INFO qdcr.trainer: [train] epoch=61 batch=10 loss=2.1444 acc=0.56 iou=0.13 objects=756
+[2026-04-19 10:36:15,635] INFO qdcr.trainer: [train] epoch=61 batch=20 loss=2.0653 acc=0.57 iou=0.15 objects=705
+[2026-04-19 10:36:39,955] INFO qdcr.trainer: [train] epoch=61 batch=30 loss=2.0792 acc=0.58 iou=0.14 objects=680
+[2026-04-19 10:36:40,018] INFO qdcr.trainer: [train] epoch=61 skipped validation eval_interval=5
+[2026-04-19 10:36:42,418] INFO qdcr.trainer: [train] epoch=62 batch=1 loss=2.0606 acc=0.56 iou=0.15 objects=652
+[2026-04-19 10:37:01,450] INFO qdcr.trainer: [train] epoch=62 batch=10 loss=2.1190 acc=0.55 iou=0.13 objects=701
+[2026-04-19 10:37:23,915] INFO qdcr.trainer: [train] epoch=62 batch=20 loss=2.0975 acc=0.61 iou=0.13 objects=737
+[2026-04-19 10:37:47,666] INFO qdcr.trainer: [train] epoch=62 batch=30 loss=2.0581 acc=0.62 iou=0.15 objects=719
+[2026-04-19 10:37:47,723] INFO qdcr.trainer: [train] epoch=62 skipped validation eval_interval=5
+[2026-04-19 10:37:50,095] INFO qdcr.trainer: [train] epoch=63 batch=1 loss=2.0430 acc=0.51 iou=0.16 objects=615
+[2026-04-19 10:38:08,951] INFO qdcr.trainer: [train] epoch=63 batch=10 loss=2.0430 acc=0.63 iou=0.14 objects=724
+[2026-04-19 10:38:31,743] INFO qdcr.trainer: [train] epoch=63 batch=20 loss=2.0846 acc=0.60 iou=0.15 objects=776
+[2026-04-19 10:38:55,698] INFO qdcr.trainer: [train] epoch=63 batch=30 loss=2.0985 acc=0.56 iou=0.14 objects=751
+[2026-04-19 10:38:55,756] INFO qdcr.trainer: [train] epoch=63 skipped validation eval_interval=5
+[2026-04-19 10:38:58,118] INFO qdcr.trainer: [train] epoch=64 batch=1 loss=2.1005 acc=0.57 iou=0.15 objects=733
+[2026-04-19 10:39:17,138] INFO qdcr.trainer: [train] epoch=64 batch=10 loss=2.0010 acc=0.63 iou=0.17 objects=696
+[2026-04-19 10:39:39,423] INFO qdcr.trainer: [train] epoch=64 batch=20 loss=2.1475 acc=0.54 iou=0.12 objects=695
+[2026-04-19 10:40:03,001] INFO qdcr.trainer: [train] epoch=64 batch=30 loss=2.1016 acc=0.56 iou=0.14 objects=766
+[2026-04-19 10:40:03,065] INFO qdcr.trainer: [train] epoch=64 skipped validation eval_interval=5
+[2026-04-19 10:40:05,463] INFO qdcr.trainer: [train] epoch=65 batch=1 loss=2.1409 acc=0.57 iou=0.13 objects=730
+[2026-04-19 10:40:25,028] INFO qdcr.trainer: [train] epoch=65 batch=10 loss=2.1054 acc=0.60 iou=0.14 objects=794
+[2026-04-19 10:40:47,803] INFO qdcr.trainer: [train] epoch=65 batch=20 loss=2.1180 acc=0.57 iou=0.13 objects=570
+[2026-04-19 10:41:11,333] INFO qdcr.trainer: [train] epoch=65 batch=30 loss=2.1406 acc=0.57 iou=0.12 objects=641
+[2026-04-19 10:42:50,692] INFO qdcr.trainer: [train] epoch=65 summary loss=2.0930 acc=0.57 iou=0.14 val_loss=2.2549 best=2.2284 best_epoch=60 wait=1/15 samples=21401
+[2026-04-19 10:42:53,386] INFO qdcr.trainer: [train] epoch=66 batch=1 loss=2.0700 acc=0.57 iou=0.15 objects=703
+[2026-04-19 10:43:15,235] INFO qdcr.trainer: [train] epoch=66 batch=10 loss=2.1148 acc=0.57 iou=0.13 objects=682
+[2026-04-19 10:43:39,212] INFO qdcr.trainer: [train] epoch=66 batch=20 loss=2.0830 acc=0.64 iou=0.14 objects=731
+[2026-04-19 10:44:02,973] INFO qdcr.trainer: [train] epoch=66 batch=30 loss=2.0255 acc=0.61 iou=0.16 objects=668
+[2026-04-19 10:44:03,032] INFO qdcr.trainer: [train] epoch=66 skipped validation eval_interval=5
+[2026-04-19 10:44:05,350] INFO qdcr.trainer: [train] epoch=67 batch=1 loss=2.0808 acc=0.55 iou=0.14 objects=680
+[2026-04-19 10:44:24,418] INFO qdcr.trainer: [train] epoch=67 batch=10 loss=2.0935 acc=0.58 iou=0.14 objects=668
+[2026-04-19 10:44:47,790] INFO qdcr.trainer: [train] epoch=67 batch=20 loss=2.0553 acc=0.61 iou=0.15 objects=751
+[2026-04-19 10:45:11,888] INFO qdcr.trainer: [train] epoch=67 batch=30 loss=2.0938 acc=0.55 iou=0.13 objects=595
+[2026-04-19 10:45:11,966] INFO qdcr.trainer: [train] epoch=67 skipped validation eval_interval=5
+[2026-04-19 10:45:14,464] INFO qdcr.trainer: [train] epoch=68 batch=1 loss=2.1159 acc=0.59 iou=0.13 objects=735
+[2026-04-19 10:45:34,238] INFO qdcr.trainer: [train] epoch=68 batch=10 loss=2.1303 acc=0.52 iou=0.13 objects=695
+[2026-04-19 10:45:57,161] INFO qdcr.trainer: [train] epoch=68 batch=20 loss=2.0519 acc=0.61 iou=0.15 objects=717
+[2026-04-19 10:46:21,382] INFO qdcr.trainer: [train] epoch=68 batch=30 loss=2.1334 acc=0.53 iou=0.13 objects=704
+[2026-04-19 10:46:21,441] INFO qdcr.trainer: [train] epoch=68 skipped validation eval_interval=5
+[2026-04-19 10:46:24,010] INFO qdcr.trainer: [train] epoch=69 batch=1 loss=2.0909 acc=0.59 iou=0.14 objects=725
+[2026-04-19 10:46:43,446] INFO qdcr.trainer: [train] epoch=69 batch=10 loss=2.1155 acc=0.56 iou=0.13 objects=747
+[2026-04-19 10:47:06,459] INFO qdcr.trainer: [train] epoch=69 batch=20 loss=2.0590 acc=0.56 iou=0.17 objects=745
+[2026-04-19 10:47:31,032] INFO qdcr.trainer: [train] epoch=69 batch=30 loss=2.0506 acc=0.61 iou=0.15 objects=708
+[2026-04-19 10:47:31,112] INFO qdcr.trainer: [train] epoch=69 skipped validation eval_interval=5
+[2026-04-19 10:47:33,688] INFO qdcr.trainer: [train] epoch=70 batch=1 loss=2.0580 acc=0.59 iou=0.15 objects=712
+[2026-04-19 10:47:53,777] INFO qdcr.trainer: [train] epoch=70 batch=10 loss=2.0575 acc=0.57 iou=0.16 objects=680
+[2026-04-19 10:48:17,495] INFO qdcr.trainer: [train] epoch=70 batch=20 loss=2.2049 acc=0.50 iou=0.12 objects=774
+[2026-04-19 10:48:41,714] INFO qdcr.trainer: [train] epoch=70 batch=30 loss=2.0883 acc=0.59 iou=0.15 objects=804
+[2026-04-19 10:50:30,265] INFO qdcr.trainer: [train] epoch=70 summary loss=2.0894 acc=0.58 iou=0.14 val_loss=2.2404 best=2.2284 best_epoch=60 wait=2/15 samples=21401
+[2026-04-19 10:50:35,473] INFO qdcr.trainer: [train] epoch=71 batch=1 loss=2.0631 acc=0.55 iou=0.14 objects=647
+[2026-04-19 10:51:03,734] INFO qdcr.trainer: [train] epoch=71 batch=10 loss=2.0872 acc=0.59 iou=0.14 objects=678
+[2026-04-19 10:51:27,927] INFO qdcr.trainer: [train] epoch=71 batch=20 loss=2.1467 acc=0.50 iou=0.12 objects=652
+[2026-04-19 10:51:52,380] INFO qdcr.trainer: [train] epoch=71 batch=30 loss=2.1628 acc=0.56 iou=0.12 objects=767
+[2026-04-19 10:51:52,456] INFO qdcr.trainer: [train] epoch=71 skipped validation eval_interval=5
+[2026-04-19 10:51:54,890] INFO qdcr.trainer: [train] epoch=72 batch=1 loss=2.0297 acc=0.62 iou=0.15 objects=642
+[2026-04-19 10:52:14,569] INFO qdcr.trainer: [train] epoch=72 batch=10 loss=2.0327 acc=0.57 iou=0.16 objects=649
+[2026-04-19 10:52:37,897] INFO qdcr.trainer: [train] epoch=72 batch=20 loss=2.0939 acc=0.56 iou=0.15 objects=807
+[2026-04-19 10:53:02,338] INFO qdcr.trainer: [train] epoch=72 batch=30 loss=2.1176 acc=0.54 iou=0.13 objects=671
+[2026-04-19 10:53:02,399] INFO qdcr.trainer: [train] epoch=72 skipped validation eval_interval=5
+[2026-04-19 10:53:04,943] INFO qdcr.trainer: [train] epoch=73 batch=1 loss=2.0610 acc=0.56 iou=0.14 objects=580
+[2026-04-19 10:53:25,187] INFO qdcr.trainer: [train] epoch=73 batch=10 loss=2.0963 acc=0.55 iou=0.13 objects=657
+[2026-04-19 10:53:48,732] INFO qdcr.trainer: [train] epoch=73 batch=20 loss=2.0814 acc=0.54 iou=0.16 objects=811
+[2026-04-19 10:54:13,331] INFO qdcr.trainer: [train] epoch=73 batch=30 loss=2.0712 acc=0.55 iou=0.15 objects=658
+[2026-04-19 10:54:13,401] INFO qdcr.trainer: [train] epoch=73 skipped validation eval_interval=5
+[2026-04-19 10:54:15,846] INFO qdcr.trainer: [train] epoch=74 batch=1 loss=2.0913 acc=0.52 iou=0.14 objects=632
+[2026-04-19 10:54:35,168] INFO qdcr.trainer: [train] epoch=74 batch=10 loss=2.0635 acc=0.61 iou=0.16 objects=811
+[2026-04-19 10:54:58,027] INFO qdcr.trainer: [train] epoch=74 batch=20 loss=2.0526 acc=0.61 iou=0.15 objects=681
+[2026-04-19 10:55:22,076] INFO qdcr.trainer: [train] epoch=74 batch=30 loss=2.0344 acc=0.60 iou=0.17 objects=776
+[2026-04-19 10:55:22,145] INFO qdcr.trainer: [train] epoch=74 skipped validation eval_interval=5
+[2026-04-19 10:55:24,694] INFO qdcr.trainer: [train] epoch=75 batch=1 loss=2.0918 acc=0.51 iou=0.14 objects=680
+[2026-04-19 10:55:44,928] INFO qdcr.trainer: [train] epoch=75 batch=10 loss=2.1457 acc=0.59 iou=0.12 objects=670
+[2026-04-19 10:56:08,598] INFO qdcr.trainer: [train] epoch=75 batch=20 loss=2.0601 acc=0.56 iou=0.15 objects=703
+[2026-04-19 10:56:32,999] INFO qdcr.trainer: [train] epoch=75 batch=30 loss=2.0606 acc=0.57 iou=0.15 objects=745
+[2026-04-19 10:58:14,259] INFO qdcr.trainer: [train] epoch=75 summary loss=2.0825 acc=0.58 iou=0.14 val_loss=2.2423 best=2.2284 best_epoch=60 wait=3/15 samples=21401
+[2026-04-19 10:58:16,916] INFO qdcr.trainer: [train] epoch=76 batch=1 loss=2.0590 acc=0.59 iou=0.15 objects=738
+[2026-04-19 10:58:37,995] INFO qdcr.trainer: [train] epoch=76 batch=10 loss=2.0858 acc=0.58 iou=0.16 objects=761
+[2026-04-19 10:59:02,433] INFO qdcr.trainer: [train] epoch=76 batch=20 loss=2.1393 acc=0.52 iou=0.13 objects=726
+[2026-04-19 10:59:26,817] INFO qdcr.trainer: [train] epoch=76 batch=30 loss=1.9809 acc=0.57 iou=0.18 objects=620
+[2026-04-19 10:59:26,897] INFO qdcr.trainer: [train] epoch=76 skipped validation eval_interval=5
+[2026-04-19 10:59:29,277] INFO qdcr.trainer: [train] epoch=77 batch=1 loss=2.0959 acc=0.61 iou=0.13 objects=747
+[2026-04-19 10:59:48,732] INFO qdcr.trainer: [train] epoch=77 batch=10 loss=2.1029 acc=0.54 iou=0.15 objects=726
+[2026-04-19 11:00:11,974] INFO qdcr.trainer: [train] epoch=77 batch=20 loss=2.0842 acc=0.57 iou=0.14 objects=716
+[2026-04-19 11:00:36,627] INFO qdcr.trainer: [train] epoch=77 batch=30 loss=2.1369 acc=0.52 iou=0.13 objects=699
+[2026-04-19 11:00:36,696] INFO qdcr.trainer: [train] epoch=77 skipped validation eval_interval=5
+[2026-04-19 11:00:39,100] INFO qdcr.trainer: [train] epoch=78 batch=1 loss=2.1587 acc=0.52 iou=0.13 objects=775
+[2026-04-19 11:00:58,218] INFO qdcr.trainer: [train] epoch=78 batch=10 loss=2.1208 acc=0.60 iou=0.13 objects=742
+[2026-04-19 11:01:20,840] INFO qdcr.trainer: [train] epoch=78 batch=20 loss=2.0300 acc=0.61 iou=0.16 objects=708
+[2026-04-19 11:01:44,846] INFO qdcr.trainer: [train] epoch=78 batch=30 loss=2.1288 acc=0.59 iou=0.12 objects=684
+[2026-04-19 11:01:44,908] INFO qdcr.trainer: [train] epoch=78 skipped validation eval_interval=5
+[2026-04-19 11:01:47,332] INFO qdcr.trainer: [train] epoch=79 batch=1 loss=2.0830 acc=0.59 iou=0.15 objects=719
+[2026-04-19 11:02:06,491] INFO qdcr.trainer: [train] epoch=79 batch=10 loss=2.0775 acc=0.58 iou=0.15 objects=701
+[2026-04-19 11:02:29,739] INFO qdcr.trainer: [train] epoch=79 batch=20 loss=2.0933 acc=0.55 iou=0.14 objects=662
+[2026-04-19 11:02:54,031] INFO qdcr.trainer: [train] epoch=79 batch=30 loss=2.0371 acc=0.60 iou=0.16 objects=668
+[2026-04-19 11:02:54,126] INFO qdcr.trainer: [train] epoch=79 skipped validation eval_interval=5
+[2026-04-19 11:02:56,638] INFO qdcr.trainer: [train] epoch=80 batch=1 loss=2.0698 acc=0.58 iou=0.16 objects=719
+[2026-04-19 11:03:16,469] INFO qdcr.trainer: [train] epoch=80 batch=10 loss=2.0270 acc=0.61 iou=0.16 objects=692
+[2026-04-19 11:03:39,482] INFO qdcr.trainer: [train] epoch=80 batch=20 loss=2.1095 acc=0.53 iou=0.14 objects=763
+[2026-04-19 11:04:03,742] INFO qdcr.trainer: [train] epoch=80 batch=30 loss=2.0779 acc=0.61 iou=0.15 objects=802
+[2026-04-19 11:05:52,673] INFO qdcr.trainer: [train] epoch=80 summary loss=2.0799 acc=0.58 iou=0.15 val_loss=2.2607 best=2.2284 best_epoch=60 wait=4/15 samples=21401
+[2026-04-19 11:05:55,545] INFO qdcr.trainer: [train] epoch=81 batch=1 loss=2.0703 acc=0.58 iou=0.15 objects=751
+[2026-04-19 11:06:17,479] INFO qdcr.trainer: [train] epoch=81 batch=10 loss=2.1039 acc=0.58 iou=0.13 objects=723
+[2026-04-19 11:06:42,159] INFO qdcr.trainer: [train] epoch=81 batch=20 loss=2.0459 acc=0.56 iou=0.17 objects=696
+[2026-04-19 11:07:06,832] INFO qdcr.trainer: [train] epoch=81 batch=30 loss=2.0914 acc=0.60 iou=0.14 objects=744
+[2026-04-19 11:07:06,894] INFO qdcr.trainer: [train] epoch=81 skipped validation eval_interval=5
+[2026-04-19 11:07:09,520] INFO qdcr.trainer: [train] epoch=82 batch=1 loss=2.0123 acc=0.63 iou=0.16 objects=734
+[2026-04-19 11:07:29,728] INFO qdcr.trainer: [train] epoch=82 batch=10 loss=2.0827 acc=0.57 iou=0.15 objects=688
+[2026-04-19 11:07:53,260] INFO qdcr.trainer: [train] epoch=82 batch=20 loss=2.1208 acc=0.55 iou=0.13 objects=734
+[2026-04-19 11:08:17,629] INFO qdcr.trainer: [train] epoch=82 batch=30 loss=2.0555 acc=0.64 iou=0.15 objects=732
+[2026-04-19 11:08:17,695] INFO qdcr.trainer: [train] epoch=82 skipped validation eval_interval=5
+[2026-04-19 11:08:20,229] INFO qdcr.trainer: [train] epoch=83 batch=1 loss=2.1078 acc=0.59 iou=0.13 objects=690
+[2026-04-19 11:08:40,279] INFO qdcr.trainer: [train] epoch=83 batch=10 loss=2.1205 acc=0.57 iou=0.13 objects=667
+[2026-04-19 11:09:03,664] INFO qdcr.trainer: [train] epoch=83 batch=20 loss=2.0731 acc=0.60 iou=0.15 objects=712
+[2026-04-19 11:09:28,178] INFO qdcr.trainer: [train] epoch=83 batch=30 loss=2.0881 acc=0.56 iou=0.15 objects=722
+[2026-04-19 11:09:28,240] INFO qdcr.trainer: [train] epoch=83 skipped validation eval_interval=5
+[2026-04-19 11:09:30,778] INFO qdcr.trainer: [train] epoch=84 batch=1 loss=2.0116 acc=0.50 iou=0.17 objects=640
+[2026-04-19 11:09:50,801] INFO qdcr.trainer: [train] epoch=84 batch=10 loss=2.0588 acc=0.58 iou=0.16 objects=746
+[2026-04-19 11:10:14,394] INFO qdcr.trainer: [train] epoch=84 batch=20 loss=2.0633 acc=0.58 iou=0.14 objects=723
+[2026-04-19 11:10:38,120] INFO qdcr.trainer: [train] epoch=84 batch=30 loss=2.1706 acc=0.50 iou=0.12 objects=678
+[2026-04-19 11:10:38,190] INFO qdcr.trainer: [train] epoch=84 skipped validation eval_interval=5
+[2026-04-19 11:10:40,532] INFO qdcr.trainer: [train] epoch=85 batch=1 loss=2.0473 acc=0.53 iou=0.16 objects=639
+[2026-04-19 11:11:00,195] INFO qdcr.trainer: [train] epoch=85 batch=10 loss=2.0282 acc=0.61 iou=0.17 objects=774
+[2026-04-19 11:11:22,602] INFO qdcr.trainer: [train] epoch=85 batch=20 loss=2.1099 acc=0.54 iou=0.12 objects=704
+[2026-04-19 11:11:46,293] INFO qdcr.trainer: [train] epoch=85 batch=30 loss=2.0970 acc=0.57 iou=0.14 objects=758
+[2026-04-19 11:13:25,732] INFO qdcr.trainer: [train] epoch=85 summary loss=2.0815 acc=0.58 iou=0.14 val_loss=2.2320 best=2.2284 best_epoch=60 wait=5/15 samples=21401
+[2026-04-19 11:13:28,354] INFO qdcr.trainer: [train] epoch=86 batch=1 loss=2.1088 acc=0.56 iou=0.13 objects=713
+[2026-04-19 11:13:49,697] INFO qdcr.trainer: [train] epoch=86 batch=10 loss=2.0585 acc=0.60 iou=0.14 objects=655
+[2026-04-19 11:14:14,289] INFO qdcr.trainer: [train] epoch=86 batch=20 loss=2.0700 acc=0.60 iou=0.14 objects=691
+[2026-04-19 11:14:38,844] INFO qdcr.trainer: [train] epoch=86 batch=30 loss=2.1081 acc=0.56 iou=0.14 objects=706
+[2026-04-19 11:14:38,901] INFO qdcr.trainer: [train] epoch=86 skipped validation eval_interval=5
+[2026-04-19 11:14:41,336] INFO qdcr.trainer: [train] epoch=87 batch=1 loss=2.0352 acc=0.64 iou=0.16 objects=685
+[2026-04-19 11:15:00,113] INFO qdcr.trainer: [train] epoch=87 batch=10 loss=2.0677 acc=0.56 iou=0.15 objects=689
+[2026-04-19 11:15:22,749] INFO qdcr.trainer: [train] epoch=87 batch=20 loss=2.0480 acc=0.56 iou=0.15 objects=572
+[2026-04-19 11:15:47,090] INFO qdcr.trainer: [train] epoch=87 batch=30 loss=2.1276 acc=0.52 iou=0.15 objects=820
+[2026-04-19 11:15:47,147] INFO qdcr.trainer: [train] epoch=87 skipped validation eval_interval=5
+[2026-04-19 11:15:49,588] INFO qdcr.trainer: [train] epoch=88 batch=1 loss=2.1195 acc=0.61 iou=0.12 objects=725
+[2026-04-19 11:16:09,251] INFO qdcr.trainer: [train] epoch=88 batch=10 loss=2.0580 acc=0.54 iou=0.15 objects=653
+[2026-04-19 11:16:31,673] INFO qdcr.trainer: [train] epoch=88 batch=20 loss=2.0979 acc=0.61 iou=0.14 objects=771
+[2026-04-19 11:16:55,560] INFO qdcr.trainer: [train] epoch=88 batch=30 loss=2.1083 acc=0.49 iou=0.14 objects=672
+[2026-04-19 11:16:55,618] INFO qdcr.trainer: [train] epoch=88 skipped validation eval_interval=5
+[2026-04-19 11:16:57,946] INFO qdcr.trainer: [train] epoch=89 batch=1 loss=2.0926 acc=0.58 iou=0.14 objects=749
+[2026-04-19 11:17:16,458] INFO qdcr.trainer: [train] epoch=89 batch=10 loss=1.9999 acc=0.63 iou=0.16 objects=693
+[2026-04-19 11:17:39,494] INFO qdcr.trainer: [train] epoch=89 batch=20 loss=2.1234 acc=0.51 iou=0.14 objects=753
+[2026-04-19 11:18:03,014] INFO qdcr.trainer: [train] epoch=89 batch=30 loss=2.0941 acc=0.55 iou=0.14 objects=653
+[2026-04-19 11:18:03,071] INFO qdcr.trainer: [train] epoch=89 skipped validation eval_interval=5
+[2026-04-19 11:18:05,505] INFO qdcr.trainer: [train] epoch=90 batch=1 loss=2.0853 acc=0.56 iou=0.16 objects=778
+[2026-04-19 11:18:24,402] INFO qdcr.trainer: [train] epoch=90 batch=10 loss=2.0522 acc=0.58 iou=0.15 objects=706
+[2026-04-19 11:18:46,795] INFO qdcr.trainer: [train] epoch=90 batch=20 loss=2.0234 acc=0.60 iou=0.16 objects=697
+[2026-04-19 11:19:10,640] INFO qdcr.trainer: [train] epoch=90 batch=30 loss=2.1076 acc=0.57 iou=0.13 objects=653
+[2026-04-19 11:20:51,005] INFO qdcr.trainer: [train] epoch=90 summary loss=2.0729 acc=0.58 iou=0.15 val_loss=2.2434 best=2.2284 best_epoch=60 wait=6/15 samples=21401
+[2026-04-19 11:20:53,688] INFO qdcr.trainer: [train] epoch=91 batch=1 loss=2.0736 acc=0.59 iou=0.15 objects=701
+[2026-04-19 11:21:14,801] INFO qdcr.trainer: [train] epoch=91 batch=10 loss=2.0865 acc=0.60 iou=0.15 objects=770
+[2026-04-19 11:21:38,572] INFO qdcr.trainer: [train] epoch=91 batch=20 loss=2.1208 acc=0.52 iou=0.14 objects=784
+[2026-04-19 11:22:02,462] INFO qdcr.trainer: [train] epoch=91 batch=30 loss=2.0968 acc=0.55 iou=0.14 objects=703
+[2026-04-19 11:22:02,529] INFO qdcr.trainer: [train] epoch=91 skipped validation eval_interval=5
+[2026-04-19 11:22:04,959] INFO qdcr.trainer: [train] epoch=92 batch=1 loss=2.0878 acc=0.56 iou=0.14 objects=726
+[2026-04-19 11:22:24,295] INFO qdcr.trainer: [train] epoch=92 batch=10 loss=2.0799 acc=0.59 iou=0.13 objects=646
+[2026-04-19 11:22:46,885] INFO qdcr.trainer: [train] epoch=92 batch=20 loss=2.1367 acc=0.55 iou=0.13 objects=755
+[2026-04-19 11:23:10,512] INFO qdcr.trainer: [train] epoch=92 batch=30 loss=2.1111 acc=0.62 iou=0.13 objects=772
+[2026-04-19 11:23:10,570] INFO qdcr.trainer: [train] epoch=92 skipped validation eval_interval=5
+[2026-04-19 11:23:13,017] INFO qdcr.trainer: [train] epoch=93 batch=1 loss=2.0969 acc=0.57 iou=0.15 objects=823
+[2026-04-19 11:23:32,278] INFO qdcr.trainer: [train] epoch=93 batch=10 loss=2.1090 acc=0.56 iou=0.14 objects=752
+[2026-04-19 11:23:54,874] INFO qdcr.trainer: [train] epoch=93 batch=20 loss=2.0755 acc=0.59 iou=0.16 objects=801
+[2026-04-19 11:24:18,716] INFO qdcr.trainer: [train] epoch=93 batch=30 loss=2.0776 acc=0.59 iou=0.13 objects=741
+[2026-04-19 11:24:18,784] INFO qdcr.trainer: [train] epoch=93 skipped validation eval_interval=5
+[2026-04-19 11:24:21,099] INFO qdcr.trainer: [train] epoch=94 batch=1 loss=2.0739 acc=0.55 iou=0.15 objects=630
+[2026-04-19 11:24:40,321] INFO qdcr.trainer: [train] epoch=94 batch=10 loss=2.0477 acc=0.59 iou=0.16 objects=636
+[2026-04-19 11:25:03,057] INFO qdcr.trainer: [train] epoch=94 batch=20 loss=2.0784 acc=0.58 iou=0.14 objects=696
+[2026-04-19 11:25:26,850] INFO qdcr.trainer: [train] epoch=94 batch=30 loss=2.0460 acc=0.59 iou=0.15 objects=720
+[2026-04-19 11:25:26,912] INFO qdcr.trainer: [train] epoch=94 skipped validation eval_interval=5
+[2026-04-19 11:25:29,301] INFO qdcr.trainer: [train] epoch=95 batch=1 loss=2.0767 acc=0.56 iou=0.15 objects=697
+[2026-04-19 11:25:48,667] INFO qdcr.trainer: [train] epoch=95 batch=10 loss=2.1393 acc=0.54 iou=0.12 objects=683
+[2026-04-19 11:26:11,294] INFO qdcr.trainer: [train] epoch=95 batch=20 loss=2.0476 acc=0.64 iou=0.14 objects=680
+[2026-04-19 11:26:34,960] INFO qdcr.trainer: [train] epoch=95 batch=30 loss=2.0913 acc=0.56 iou=0.14 objects=716
+[2026-04-19 11:28:13,791] INFO qdcr.trainer: [train] epoch=95 summary loss=2.0801 acc=0.57 iou=0.15 val_loss=2.2517 best=2.2284 best_epoch=60 wait=7/15 samples=21401
+[2026-04-19 11:28:16,404] INFO qdcr.trainer: [train] epoch=96 batch=1 loss=2.0486 acc=0.57 iou=0.16 objects=669
+[2026-04-19 11:28:37,826] INFO qdcr.trainer: [train] epoch=96 batch=10 loss=2.0949 acc=0.55 iou=0.14 objects=698
+[2026-04-19 11:29:02,248] INFO qdcr.trainer: [train] epoch=96 batch=20 loss=2.1150 acc=0.55 iou=0.14 objects=672
+[2026-04-19 11:29:26,736] INFO qdcr.trainer: [train] epoch=96 batch=30 loss=2.0988 acc=0.57 iou=0.13 objects=699
+[2026-04-19 11:29:26,794] INFO qdcr.trainer: [train] epoch=96 skipped validation eval_interval=5
+[2026-04-19 11:29:29,235] INFO qdcr.trainer: [train] epoch=97 batch=1 loss=2.1305 acc=0.59 iou=0.13 objects=808
+[2026-04-19 11:29:48,134] INFO qdcr.trainer: [train] epoch=97 batch=10 loss=2.1086 acc=0.53 iou=0.14 objects=609
+[2026-04-19 11:30:10,544] INFO qdcr.trainer: [train] epoch=97 batch=20 loss=2.0819 acc=0.56 iou=0.15 objects=658
+[2026-04-19 11:30:34,941] INFO qdcr.trainer: [train] epoch=97 batch=30 loss=2.0997 acc=0.54 iou=0.15 objects=714
+[2026-04-19 11:30:35,014] INFO qdcr.trainer: [train] epoch=97 skipped validation eval_interval=5
+[2026-04-19 11:30:37,413] INFO qdcr.trainer: [train] epoch=98 batch=1 loss=2.0702 acc=0.63 iou=0.14 objects=625
+[2026-04-19 11:30:56,482] INFO qdcr.trainer: [train] epoch=98 batch=10 loss=2.0951 acc=0.56 iou=0.15 objects=790
+[2026-04-19 11:31:18,971] INFO qdcr.trainer: [train] epoch=98 batch=20 loss=2.0861 acc=0.54 iou=0.16 objects=817
+[2026-04-19 11:31:42,729] INFO qdcr.trainer: [train] epoch=98 batch=30 loss=2.0912 acc=0.56 iou=0.14 objects=693
+[2026-04-19 11:31:42,801] INFO qdcr.trainer: [train] epoch=98 skipped validation eval_interval=5
+[2026-04-19 11:31:45,193] INFO qdcr.trainer: [train] epoch=99 batch=1 loss=2.0672 acc=0.55 iou=0.15 objects=692
+[2026-04-19 11:32:04,730] INFO qdcr.trainer: [train] epoch=99 batch=10 loss=2.1010 acc=0.59 iou=0.14 objects=714
+[2026-04-19 11:32:27,092] INFO qdcr.trainer: [train] epoch=99 batch=20 loss=2.0751 acc=0.65 iou=0.13 objects=704
+[2026-04-19 11:32:51,429] INFO qdcr.trainer: [train] epoch=99 batch=30 loss=2.1068 acc=0.57 iou=0.13 objects=683
+[2026-04-19 11:32:51,487] INFO qdcr.trainer: [train] epoch=99 skipped validation eval_interval=5
+[2026-04-19 11:32:53,851] INFO qdcr.trainer: [train] epoch=100 batch=1 loss=2.0828 acc=0.60 iou=0.13 objects=690
+[2026-04-19 11:33:13,077] INFO qdcr.trainer: [train] epoch=100 batch=10 loss=2.1003 acc=0.58 iou=0.13 objects=681
+[2026-04-19 11:33:36,126] INFO qdcr.trainer: [train] epoch=100 batch=20 loss=2.1342 acc=0.56 iou=0.13 objects=718
+[2026-04-19 11:34:00,033] INFO qdcr.trainer: [train] epoch=100 batch=30 loss=2.0391 acc=0.57 iou=0.15 objects=660
+[2026-04-19 11:35:40,145] INFO qdcr.trainer: [train] epoch=100 summary loss=2.0750 acc=0.58 iou=0.15 val_loss=2.2272 best=2.2272 best_epoch=100 wait=0/15 samples=21401
+[2026-04-19 11:35:42,776] INFO qdcr.trainer: [train] epoch=101 batch=1 loss=2.0854 acc=0.57 iou=0.14 objects=709
+[2026-04-19 11:36:04,213] INFO qdcr.trainer: [train] epoch=101 batch=10 loss=2.0946 acc=0.56 iou=0.14 objects=689
+[2026-04-19 11:36:28,142] INFO qdcr.trainer: [train] epoch=101 batch=20 loss=2.0953 acc=0.64 iou=0.13 objects=769
+[2026-04-19 11:36:52,228] INFO qdcr.trainer: [train] epoch=101 batch=30 loss=2.0518 acc=0.58 iou=0.16 objects=740
+[2026-04-19 11:36:52,287] INFO qdcr.trainer: [train] epoch=101 skipped validation eval_interval=5
+[2026-04-19 11:36:54,700] INFO qdcr.trainer: [train] epoch=102 batch=1 loss=2.1067 acc=0.57 iou=0.14 objects=700
+[2026-04-19 11:37:13,864] INFO qdcr.trainer: [train] epoch=102 batch=10 loss=2.0977 acc=0.58 iou=0.14 objects=678
+[2026-04-19 11:37:36,280] INFO qdcr.trainer: [train] epoch=102 batch=20 loss=2.0807 acc=0.54 iou=0.15 objects=712
+[2026-04-19 11:38:00,417] INFO qdcr.trainer: [train] epoch=102 batch=30 loss=2.0589 acc=0.59 iou=0.16 objects=726
+[2026-04-19 11:38:00,474] INFO qdcr.trainer: [train] epoch=102 skipped validation eval_interval=5
+[2026-04-19 11:38:02,845] INFO qdcr.trainer: [train] epoch=103 batch=1 loss=2.0944 acc=0.52 iou=0.16 objects=797
+[2026-04-19 11:38:21,684] INFO qdcr.trainer: [train] epoch=103 batch=10 loss=2.0775 acc=0.56 iou=0.13 objects=642
+[2026-04-19 11:38:44,683] INFO qdcr.trainer: [train] epoch=103 batch=20 loss=2.1249 acc=0.56 iou=0.12 objects=744
+[2026-04-19 11:39:08,356] INFO qdcr.trainer: [train] epoch=103 batch=30 loss=2.0058 acc=0.58 iou=0.17 objects=641
+[2026-04-19 11:39:08,413] INFO qdcr.trainer: [train] epoch=103 skipped validation eval_interval=5
+[2026-04-19 11:39:10,783] INFO qdcr.trainer: [train] epoch=104 batch=1 loss=2.0898 acc=0.50 iou=0.15 objects=715
+[2026-04-19 11:39:29,881] INFO qdcr.trainer: [train] epoch=104 batch=10 loss=2.1318 acc=0.54 iou=0.13 objects=744
+[2026-04-19 11:39:52,592] INFO qdcr.trainer: [train] epoch=104 batch=20 loss=2.0795 acc=0.61 iou=0.15 objects=741
+[2026-04-19 11:40:16,814] INFO qdcr.trainer: [train] epoch=104 batch=30 loss=2.0630 acc=0.56 iou=0.15 objects=701
+[2026-04-19 11:40:16,873] INFO qdcr.trainer: [train] epoch=104 skipped validation eval_interval=5
+[2026-04-19 11:40:19,336] INFO qdcr.trainer: [train] epoch=105 batch=1 loss=2.1271 acc=0.62 iou=0.11 objects=670
+[2026-04-19 11:40:38,637] INFO qdcr.trainer: [train] epoch=105 batch=10 loss=2.0539 acc=0.57 iou=0.16 objects=777
+[2026-04-19 11:41:01,327] INFO qdcr.trainer: [train] epoch=105 batch=20 loss=2.0931 acc=0.59 iou=0.14 objects=708
+[2026-04-19 11:41:25,372] INFO qdcr.trainer: [train] epoch=105 batch=30 loss=2.0678 acc=0.60 iou=0.14 objects=726
+[2026-04-19 11:43:06,740] INFO qdcr.trainer: [train] epoch=105 summary loss=2.0755 acc=0.58 iou=0.15 val_loss=2.2259 best=2.2259 best_epoch=105 wait=0/15 samples=21401
+[2026-04-19 11:43:09,361] INFO qdcr.trainer: [train] epoch=106 batch=1 loss=2.0912 acc=0.57 iou=0.15 objects=743
+[2026-04-19 11:43:31,196] INFO qdcr.trainer: [train] epoch=106 batch=10 loss=2.0771 acc=0.59 iou=0.14 objects=673
+[2026-04-19 11:43:55,192] INFO qdcr.trainer: [train] epoch=106 batch=20 loss=2.0056 acc=0.59 iou=0.17 objects=682
+[2026-04-19 11:44:19,324] INFO qdcr.trainer: [train] epoch=106 batch=30 loss=2.0367 acc=0.59 iou=0.17 objects=713
+[2026-04-19 11:44:19,401] INFO qdcr.trainer: [train] epoch=106 skipped validation eval_interval=5
+[2026-04-19 11:44:21,868] INFO qdcr.trainer: [train] epoch=107 batch=1 loss=2.0464 acc=0.59 iou=0.15 objects=772
+[2026-04-19 11:44:41,020] INFO qdcr.trainer: [train] epoch=107 batch=10 loss=2.0909 acc=0.59 iou=0.13 objects=725
+[2026-04-19 11:45:04,216] INFO qdcr.trainer: [train] epoch=107 batch=20 loss=2.0359 acc=0.60 iou=0.16 objects=725
+[2026-04-19 11:45:28,478] INFO qdcr.trainer: [train] epoch=107 batch=30 loss=2.0649 acc=0.61 iou=0.16 objects=752
+[2026-04-19 11:45:28,551] INFO qdcr.trainer: [train] epoch=107 skipped validation eval_interval=5
+[2026-04-19 11:45:30,892] INFO qdcr.trainer: [train] epoch=108 batch=1 loss=2.0797 acc=0.62 iou=0.15 objects=765
+[2026-04-19 11:45:50,233] INFO qdcr.trainer: [train] epoch=108 batch=10 loss=2.0929 acc=0.55 iou=0.14 objects=687
+[2026-04-19 11:46:12,691] INFO qdcr.trainer: [train] epoch=108 batch=20 loss=2.0968 acc=0.60 iou=0.14 objects=780
+[2026-04-19 11:46:36,652] INFO qdcr.trainer: [train] epoch=108 batch=30 loss=2.0668 acc=0.59 iou=0.15 objects=698
+[2026-04-19 11:46:36,773] INFO qdcr.trainer: [train] epoch=108 skipped validation eval_interval=5
+[2026-04-19 11:46:39,214] INFO qdcr.trainer: [train] epoch=109 batch=1 loss=2.0968 acc=0.62 iou=0.14 objects=795
+[2026-04-19 11:46:58,121] INFO qdcr.trainer: [train] epoch=109 batch=10 loss=2.1080 acc=0.58 iou=0.12 objects=640
+[2026-04-19 11:47:20,820] INFO qdcr.trainer: [train] epoch=109 batch=20 loss=2.0595 acc=0.61 iou=0.15 objects=796
+[2026-04-19 11:47:44,490] INFO qdcr.trainer: [train] epoch=109 batch=30 loss=2.0456 acc=0.61 iou=0.14 objects=713
+[2026-04-19 11:47:44,548] INFO qdcr.trainer: [train] epoch=109 skipped validation eval_interval=5
+[2026-04-19 11:47:46,831] INFO qdcr.trainer: [train] epoch=110 batch=1 loss=2.1147 acc=0.55 iou=0.14 objects=741
+[2026-04-19 11:48:06,569] INFO qdcr.trainer: [train] epoch=110 batch=10 loss=2.0521 acc=0.63 iou=0.16 objects=835
+[2026-04-19 11:48:28,932] INFO qdcr.trainer: [train] epoch=110 batch=20 loss=2.0868 acc=0.54 iou=0.15 objects=724
+[2026-04-19 11:48:52,539] INFO qdcr.trainer: [train] epoch=110 batch=30 loss=1.9995 acc=0.61 iou=0.16 objects=647
+[2026-04-19 11:50:33,309] INFO qdcr.trainer: [train] epoch=110 summary loss=2.0743 acc=0.58 iou=0.15 val_loss=2.2449 best=2.2259 best_epoch=105 wait=1/15 samples=21401
+[2026-04-19 11:50:35,922] INFO qdcr.trainer: [train] epoch=111 batch=1 loss=2.0825 acc=0.57 iou=0.13 objects=674
+[2026-04-19 11:50:57,072] INFO qdcr.trainer: [train] epoch=111 batch=10 loss=2.0934 acc=0.59 iou=0.14 objects=668
+[2026-04-19 11:51:21,176] INFO qdcr.trainer: [train] epoch=111 batch=20 loss=2.0186 acc=0.63 iou=0.16 objects=726
+[2026-04-19 11:51:44,988] INFO qdcr.trainer: [train] epoch=111 batch=30 loss=2.0535 acc=0.61 iou=0.16 objects=713
+[2026-04-19 11:51:45,048] INFO qdcr.trainer: [train] epoch=111 skipped validation eval_interval=5
+[2026-04-19 11:51:47,426] INFO qdcr.trainer: [train] epoch=112 batch=1 loss=2.1518 acc=0.53 iou=0.12 objects=707
+[2026-04-19 11:52:06,863] INFO qdcr.trainer: [train] epoch=112 batch=10 loss=2.0709 acc=0.54 iou=0.15 objects=678
+[2026-04-19 11:52:29,907] INFO qdcr.trainer: [train] epoch=112 batch=20 loss=2.0848 acc=0.58 iou=0.15 objects=738
+[2026-04-19 11:52:54,151] INFO qdcr.trainer: [train] epoch=112 batch=30 loss=2.0203 acc=0.58 iou=0.17 objects=720
+[2026-04-19 11:52:54,212] INFO qdcr.trainer: [train] epoch=112 skipped validation eval_interval=5
+[2026-04-19 11:52:56,611] INFO qdcr.trainer: [train] epoch=113 batch=1 loss=2.1021 acc=0.56 iou=0.15 objects=805
+[2026-04-19 11:53:16,012] INFO qdcr.trainer: [train] epoch=113 batch=10 loss=2.0648 acc=0.56 iou=0.16 objects=736
+[2026-04-19 11:53:38,875] INFO qdcr.trainer: [train] epoch=113 batch=20 loss=2.0804 acc=0.61 iou=0.13 objects=679
+[2026-04-19 11:54:02,537] INFO qdcr.trainer: [train] epoch=113 batch=30 loss=2.0649 acc=0.59 iou=0.15 objects=688
+[2026-04-19 11:54:02,595] INFO qdcr.trainer: [train] epoch=113 skipped validation eval_interval=5
+[2026-04-19 11:54:04,915] INFO qdcr.trainer: [train] epoch=114 batch=1 loss=2.0835 acc=0.56 iou=0.14 objects=662
+[2026-04-19 11:54:24,072] INFO qdcr.trainer: [train] epoch=114 batch=10 loss=1.9882 acc=0.63 iou=0.17 objects=686
+[2026-04-19 11:54:46,998] INFO qdcr.trainer: [train] epoch=114 batch=20 loss=2.0444 acc=0.57 iou=0.17 objects=752
+[2026-04-19 11:55:10,552] INFO qdcr.trainer: [train] epoch=114 batch=30 loss=2.0708 acc=0.59 iou=0.13 objects=652
+[2026-04-19 11:55:10,610] INFO qdcr.trainer: [train] epoch=114 skipped validation eval_interval=5
+[2026-04-19 11:55:12,956] INFO qdcr.trainer: [train] epoch=115 batch=1 loss=2.0447 acc=0.57 iou=0.15 objects=734
+[2026-04-19 11:55:31,955] INFO qdcr.trainer: [train] epoch=115 batch=10 loss=2.0432 acc=0.62 iou=0.15 objects=700
+[2026-04-19 11:55:54,767] INFO qdcr.trainer: [train] epoch=115 batch=20 loss=2.0778 acc=0.57 iou=0.15 objects=691
+[2026-04-19 11:56:18,390] INFO qdcr.trainer: [train] epoch=115 batch=30 loss=2.0973 acc=0.60 iou=0.14 objects=712
+[2026-04-19 11:57:57,486] INFO qdcr.trainer: [train] epoch=115 summary loss=2.0681 acc=0.59 iou=0.15 val_loss=2.2417 best=2.2259 best_epoch=105 wait=2/15 samples=21401
+[2026-04-19 11:58:00,138] INFO qdcr.trainer: [train] epoch=116 batch=1 loss=2.0825 acc=0.58 iou=0.13 objects=684
+[2026-04-19 11:58:21,324] INFO qdcr.trainer: [train] epoch=116 batch=10 loss=2.0589 acc=0.58 iou=0.15 objects=695
+[2026-04-19 11:58:45,382] INFO qdcr.trainer: [train] epoch=116 batch=20 loss=2.0839 acc=0.59 iou=0.14 objects=693
+[2026-04-19 11:59:09,253] INFO qdcr.trainer: [train] epoch=116 batch=30 loss=2.0765 acc=0.58 iou=0.14 objects=702
+[2026-04-19 11:59:09,343] INFO qdcr.trainer: [train] epoch=116 skipped validation eval_interval=5
+[2026-04-19 11:59:11,645] INFO qdcr.trainer: [train] epoch=117 batch=1 loss=2.1147 acc=0.60 iou=0.12 objects=691
+[2026-04-19 11:59:30,878] INFO qdcr.trainer: [train] epoch=117 batch=10 loss=2.1150 acc=0.55 iou=0.13 objects=655
+[2026-04-19 11:59:53,736] INFO qdcr.trainer: [train] epoch=117 batch=20 loss=2.0590 acc=0.57 iou=0.15 objects=764
+[2026-04-19 12:00:17,555] INFO qdcr.trainer: [train] epoch=117 batch=30 loss=2.0151 acc=0.58 iou=0.17 objects=737
+[2026-04-19 12:00:17,615] INFO qdcr.trainer: [train] epoch=117 skipped validation eval_interval=5
+[2026-04-19 12:00:20,066] INFO qdcr.trainer: [train] epoch=118 batch=1 loss=2.0357 acc=0.62 iou=0.15 objects=683
+[2026-04-19 12:00:39,331] INFO qdcr.trainer: [train] epoch=118 batch=10 loss=2.0511 acc=0.55 iou=0.16 objects=671
+[2026-04-19 12:01:02,169] INFO qdcr.trainer: [train] epoch=118 batch=20 loss=2.0773 acc=0.59 iou=0.15 objects=706
+[2026-04-19 12:01:25,986] INFO qdcr.trainer: [train] epoch=118 batch=30 loss=2.1222 acc=0.57 iou=0.12 objects=691
+[2026-04-19 12:01:26,054] INFO qdcr.trainer: [train] epoch=118 skipped validation eval_interval=5
+[2026-04-19 12:01:28,452] INFO qdcr.trainer: [train] epoch=119 batch=1 loss=2.0912 acc=0.60 iou=0.14 objects=736
+[2026-04-19 12:01:47,647] INFO qdcr.trainer: [train] epoch=119 batch=10 loss=2.0722 acc=0.56 iou=0.14 objects=763
+[2026-04-19 12:02:10,431] INFO qdcr.trainer: [train] epoch=119 batch=20 loss=2.0892 acc=0.59 iou=0.15 objects=754
+[2026-04-19 12:02:34,018] INFO qdcr.trainer: [train] epoch=119 batch=30 loss=2.1113 acc=0.56 iou=0.13 objects=639
+[2026-04-19 12:02:34,077] INFO qdcr.trainer: [train] epoch=119 skipped validation eval_interval=5
+[2026-04-19 12:02:36,428] INFO qdcr.trainer: [train] epoch=120 batch=1 loss=2.0335 acc=0.60 iou=0.16 objects=667
+[2026-04-19 12:02:55,301] INFO qdcr.trainer: [train] epoch=120 batch=10 loss=2.0964 acc=0.56 iou=0.14 objects=692
+[2026-04-19 12:03:18,226] INFO qdcr.trainer: [train] epoch=120 batch=20 loss=2.1014 acc=0.59 iou=0.12 objects=619
+[2026-04-19 12:03:41,890] INFO qdcr.trainer: [train] epoch=120 batch=30 loss=2.0603 acc=0.59 iou=0.15 objects=657
+[2026-04-19 12:05:22,250] INFO qdcr.trainer: [train] epoch=120 summary loss=2.0674 acc=0.58 iou=0.15 val_loss=2.2602 best=2.2259 best_epoch=105 wait=3/15 samples=21401
+[2026-04-19 12:05:26,171] INFO qdcr.dingtalk: 钉钉机器人消息响应：{"errcode":0,"errmsg":"ok"}
+[2026-04-19 12:05:26,172] INFO qdcr.notify: [notify] dingtalk success message sent stage=训练
+TensorBoard log dir: /ds1/workspace/ai/QDCR-Net/runs/20260419-090705_qdcr_net_ruod_bs100_lr0.0003_seed42_qdcr_ruod_sparse_tuned_full

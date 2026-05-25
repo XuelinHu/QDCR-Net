@@ -1,0 +1,4 @@
+[2026-04-18 18:56:12] formal matrix runner started
+[2026-04-18 18:56:12] selected configs (2): configs/formal/qdcr_ruod_sparse_tuned_full.yaml configs/formal/yolov8_ruod_full.yaml
+[2026-04-18 18:56:12] gpu ready: memory.used=250MiB
+[2026-04-18 18:56:12] train start: configs/formal/qdcr_ruod_sparse_tuned_full.yaml model=qdcr_net

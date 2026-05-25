@@ -1,0 +1,18 @@
+[2026-04-18 05:59:52,343] INFO qdcr.trainer: [eval] loaded checkpoint=outputs/checkpoints/baseline_ruod_tuned_full/best.pt metadata={'experiment': 'baseline_ruod_tuned_full', 'epoch': 89, 'samples': 21401, 'device': 'cuda', 'best_metric': 2.18392232627729, 'monitor': 'loss'}
+[2026-04-18 05:59:52,343] INFO qdcr.trainer: [eval] experiment=baseline_ruod_tuned_full dataset_size=1255 batch_size=64 max_batches=0 device=cuda
+[2026-04-18 05:59:52,343] INFO qdcr.trainer: [eval] tensorboard_log_dir=/ds1/workspace/ai/QDCR-Net/runs/20260418-055952_baseline_detector_ruod_bs64_lr0.0003_seed42_baseline_ruod_tuned_full
+[2026-04-18 06:01:42,449] INFO qdcr.trainer: [eval] summary loss=2.1839 acc=0.55 iou=0.13 map50=0.012 map50_95=0.003 params=0.069M gflops=1.033 fps=0.00 samples=9288
+[2026-04-18 06:01:45,385] INFO qdcr.dingtalk: 钉钉机器人消息响应：{"errcode":0,"errmsg":"ok"}
+[2026-04-18 06:01:45,386] INFO qdcr.notify: [notify] dingtalk success message sent stage=评估
+TensorBoard log dir: /ds1/workspace/ai/QDCR-Net/runs/20260418-055952_baseline_detector_ruod_bs64_lr0.0003_seed42_baseline_ruod_tuned_full
+Evaluation metrics:
+  loss: 2.183922
+  acc: 0.546512
+  box_iou: 0.125561
+  map50: 0.012044
+  map50_95: 0.003055
+  precision: 0.022041
+  recall: 0.040176
+  params_m: 0.069481
+  gflops: 1.033259
+  fps: 0.000000

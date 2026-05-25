@@ -1,0 +1,11 @@
+step	tag	value
+1	eval/loss	2.22593135
+1	eval/acc	0.50818260
+1	eval/box_iou	0.11618101
+1	eval/mAP	0.00554308
+1	eval/mAP50_95	0.00113306
+1	eval/precision	0.01751136
+1	eval/recall	0.03087274
+1	eval/params_m	0.13741700
+1	eval/gflops	2.06549197
+1	eval/fps	0.00000000

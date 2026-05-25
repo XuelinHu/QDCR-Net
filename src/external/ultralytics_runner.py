@@ -41,9 +41,13 @@ class UltralyticsRunner:
         self.run_dir = TensorBoardLogger(self.config).run_dir
         self.best_checkpoint_path = self.output_dir / "weights" / "best.pt"
         self.metrics_path = self.output_dir / "metrics.json"
+        self.config_snapshot_path = self.output_dir / "experiment_config.yaml"
+        self.summary_path = self.output_dir / "experiment_summary.json"
         self.data_yaml_path = self._prepare_data_yaml()
 
     def train(self) -> dict[str, float]:
+        self._write_config_snapshot()
+        self._write_experiment_summary()
         model = self._build_model()
         self.logger.info("[ultralytics.train] model=%s data=%s output=%s", self.model_config["name"], self.data_yaml_path, self.output_dir)
         model.train(
@@ -79,6 +83,60 @@ class UltralyticsRunner:
         metrics = self._extract_metrics(results)
         self.metrics_path.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
         return metrics
+
+    def _write_config_snapshot(self) -> None:
+        self.config_snapshot_path.write_text(
+            yaml.safe_dump(self.config, sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+
+    def _write_experiment_summary(self) -> None:
+        early_stopping = self.train_config.get("early_stopping", {})
+        summary = {
+            "experiment_name": self.experiment_config.get("name", "unknown"),
+            "output_dir": str(self.output_dir),
+            "runs_dir": self.experiment_config.get("runs_dir", ""),
+            "device": str(self.experiment_config.get("device", "cuda")),
+            "seed": int(self.experiment_config.get("seed", 42)),
+            "dataset": {
+                "name": self.dataset_config.get("name", "dataset"),
+                "train_root": self.dataset_config.get("train_root", ""),
+                "val_root": self.dataset_config.get("val_root", ""),
+                "enhanced_root": self.dataset_config.get("enhanced_root", ""),
+                "num_classes": int(self.dataset_config.get("num_classes", 0)),
+                "image_size": int(self.dataset_config.get("image_size", 640)),
+                "max_objects": int(self.dataset_config.get("max_objects", 0)),
+            },
+            "model": {
+                "name": self.model_config.get("name", "unknown"),
+                "weights": self.model_config.get("weights", ""),
+            },
+            "train": {
+                "epochs": int(self.train_config.get("epochs", 100)),
+                "batch_size": int(self.train_config.get("batch_size", 4)),
+                "optimizer": "ultralytics_default",
+                "learning_rate": float(self.train_config.get("lr", 1e-3)),
+                "weight_decay": float(self.train_config.get("weight_decay", 0.0)),
+                "early_stopping": {
+                    "patience": int(early_stopping.get("patience", 10)),
+                },
+            },
+            "eval": {
+                "split": self.eval_config.get("split", "val"),
+                "conf_thresh": float(self.eval_config.get("conf_thresh", 0.25)),
+                "iou_thresh": float(self.eval_config.get("iou_thresh", 0.5)),
+            },
+            "loss": {
+                "name": "UltralyticsDetectionLoss",
+                "components": ["box_loss", "cls_loss", "dfl_loss"],
+            },
+            "artifacts": {
+                "data_yaml": str(self.data_yaml_path),
+                "best_checkpoint": str(self.best_checkpoint_path),
+                "metrics_path": str(self.metrics_path),
+            },
+        }
+        self.summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def _build_model(self, weights_path: Path | None = None) -> Any:
         model_name = str(self.model_config.get("name", "yolov8"))

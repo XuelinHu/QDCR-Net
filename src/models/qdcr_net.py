@@ -98,7 +98,18 @@ class _DetectionHead(nn.Module):
 class QDCRNet(nn.Module):
     """最小化实现的 QDCR 多 query 检测器。"""
 
-    def __init__(self, num_classes: int, feature_dim: int = 32, num_queries: int = 8) -> None:
+    def __init__(
+        self,
+        num_classes: int,
+        feature_dim: int = 32,
+        num_queries: int = 8,
+        cross_residual_mode: str = "vanilla",
+        cross_residual_threshold_init: float = 0.1,
+        cross_residual_threshold_slope: float = 10.0,
+        cross_residual_sparse_mode: str = "soft_threshold",
+        cross_residual_sparse_lambda_init: float = 0.1,
+        cross_residual_topk_ratio: float = 0.5,
+    ) -> None:
         super().__init__()
         self.num_classes = num_classes
         self.feature_dim = feature_dim
@@ -107,7 +118,16 @@ class QDCRNet(nn.Module):
 
         self.raw_branch = _ConvBranch(out_channels=feature_dim)
         self.enhanced_branch = _ConvBranch(out_channels=feature_dim)
-        self.cross_residual = CrossResidualBlock(in_channels=feature_dim, out_channels=feature_dim)
+        self.cross_residual = CrossResidualBlock(
+            in_channels=feature_dim,
+            out_channels=feature_dim,
+            mode=cross_residual_mode,
+            threshold_init=cross_residual_threshold_init,
+            threshold_slope=cross_residual_threshold_slope,
+            sparse_mode=cross_residual_sparse_mode,
+            sparse_lambda_init=cross_residual_sparse_lambda_init,
+            sparse_topk_ratio=cross_residual_topk_ratio,
+        )
         self.fusion = QualityAwareFusion(channels=feature_dim)
         self.query_embed = nn.Embedding(num_queries, feature_dim)
         self.head = _DetectionHead(feature_dim, self.num_detection_classes)

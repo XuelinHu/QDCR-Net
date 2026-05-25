@@ -1,0 +1,64 @@
+experiment:
+  name: qdcr_ruod_threshold_tuned_full
+  seed: 42
+  output_dir: outputs/checkpoints/qdcr_ruod_threshold_tuned_full
+  runs_dir: runs/qdcr_ruod_threshold_tuned_full
+  device: cuda
+dataset:
+  name: ruod
+  train_root: data/datasets/downloads/RUOD/RUOD/train/images
+  val_root: data/datasets/downloads/RUOD/RUOD/valid/images
+  enhanced_root: data/datasets/downloads/RUOD/RUOD/train/images
+  num_classes: 4
+  synthetic_size: 0
+  max_objects: 16
+  class_names:
+  - holothurian
+  - echinus
+  - starfish
+  - scallop
+  image_size: 640
+  workers: 1
+  prefetch_factor: 1
+  cache_preprocessed: true
+  cache_dir: /tmp/qdcr_preprocessed/ruod_formal
+model:
+  name: qdcr_net
+  feature_dim: 64
+  num_queries: 16
+  backbone: dual_branch
+  quality_aware: true
+  cross_residual_mode: learnable_threshold
+  cross_residual_threshold_init: 0.1
+  cross_residual_threshold_slope: 10.0
+  cross_residual_sparse_mode: soft_threshold
+  cross_residual_sparse_lambda_init: 0.1
+  cross_residual_topk_ratio: 0.5
+  cross_residual_stages:
+  - stage2
+  - stage3
+  small_object_neck: true
+train:
+  epochs: 120
+  batch_size: 100
+  max_batches_per_epoch: 0
+  log_interval: 10
+  scalar_log_interval: 10
+  eval_interval: 5
+  amp: true
+  log_graph: false
+  log_histograms: false
+  optimizer: adamw
+  lr: 0.0003
+  weight_decay: 0.0005
+  early_stopping:
+    enabled: true
+    monitor: loss
+    mode: min
+    patience: 15
+    min_delta: 0.0005
+eval:
+  checkpoint: best
+  max_batches: 0
+  conf_thresh: 0.05
+  iou_thresh: 0.5

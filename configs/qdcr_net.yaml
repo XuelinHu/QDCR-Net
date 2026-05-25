@@ -26,6 +26,12 @@ model:
   num_queries: 8
   backbone: dual_branch
   quality_aware: true
+  cross_residual_mode: vanilla
+  cross_residual_threshold_init: 0.1
+  cross_residual_threshold_slope: 10.0
+  cross_residual_sparse_mode: soft_threshold
+  cross_residual_sparse_lambda_init: 0.1
+  cross_residual_topk_ratio: 0.5
   cross_residual_stages:
     - stage2
     - stage3

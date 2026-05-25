@@ -77,23 +77,20 @@ def greedy_match(
     cls_cost = -probabilities[:, gt_classes]
     total_cost = cls_weight * cls_cost + l1_weight * l1_matrix + iou_weight * (1.0 - iou_matrix)
 
-    # 展平成候选对后排序，实现一个简单但足够稳定的匹配过程。
-    candidate_pairs: list[tuple[float, int, int]] = []
-    for pred_index in range(num_queries):
-        for gt_index in range(gt_classes.size(0)):
-            candidate_pairs.append((float(total_cost[pred_index, gt_index].item()), pred_index, gt_index))
-    candidate_pairs.sort(key=lambda item: item[0])
-
-    used_predictions: set[int] = set()
-    used_ground_truth: set[int] = set()
-    for _, pred_index, gt_index in candidate_pairs:
-        if pred_index in used_predictions or gt_index in used_ground_truth:
-            continue
-        used_predictions.add(pred_index)
-        used_ground_truth.add(gt_index)
+    remaining_cost = total_cost.clone()
+    max_matches = min(num_queries, gt_classes.size(0))
+    inf = torch.tensor(torch.inf, device=remaining_cost.device, dtype=remaining_cost.dtype)
+    for _ in range(max_matches):
+        flat_index = torch.argmin(remaining_cost).item()
+        pred_index = flat_index // gt_classes.size(0)
+        gt_index = flat_index % gt_classes.size(0)
+        if not torch.isfinite(remaining_cost[pred_index, gt_index]):
+            break
         matched_classes[pred_index] = gt_classes[gt_index]
         matched_boxes[pred_index] = gt_boxes[gt_index]
         matched_mask[pred_index] = True
+        remaining_cost[pred_index, :] = inf
+        remaining_cost[:, gt_index] = inf
 
     return matched_classes, matched_boxes, matched_mask
 

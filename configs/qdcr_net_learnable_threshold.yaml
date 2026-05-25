@@ -1,0 +1,57 @@
+experiment:
+  name: qdcr_net_learnable_threshold
+  seed: 42
+  output_dir: outputs/checkpoints/qdcr_net_learnable_threshold
+  runs_dir: runs/qdcr_net_learnable_threshold
+  device: cuda
+
+dataset:
+  train_root: data/datasets/URPC2018/train/images
+  val_root: data/datasets/URPC2018/val/images
+  enhanced_root: data/datasets/URPC2018_enhanced
+  num_classes: 4
+  synthetic_size: 16
+  max_objects: 8
+  class_names:
+    - holothurian
+    - echinus
+    - starfish
+    - scallop
+  image_size: 640
+  workers: 4
+
+model:
+  name: qdcr_net
+  feature_dim: 32
+  num_queries: 8
+  backbone: dual_branch
+  quality_aware: true
+  cross_residual_mode: learnable_threshold
+  cross_residual_threshold_init: 0.1
+  cross_residual_threshold_slope: 10.0
+  cross_residual_sparse_mode: soft_threshold
+  cross_residual_sparse_lambda_init: 0.1
+  cross_residual_topk_ratio: 0.5
+  cross_residual_stages:
+    - stage2
+    - stage3
+  small_object_neck: true
+
+train:
+  epochs: 50
+  batch_size: 4
+  max_batches_per_epoch: 0
+  optimizer: adamw
+  lr: 0.001
+  weight_decay: 0.0005
+  early_stopping:
+    enabled: true
+    monitor: loss
+    mode: min
+    patience: 8
+    min_delta: 0.0005
+
+eval:
+  max_batches: 0
+  conf_thresh: 0.25
+  iou_thresh: 0.5
