@@ -1,12 +1,12 @@
 # QDCR-Net
 
 <p align="center">
-  <img height="20" src="https://img.shields.io/badge/python-3.10-blue" />
-  <img height="20" src="https://img.shields.io/badge/pytorch-2.4.0-%23EE4C2C" />
-  <img height="20" src="https://img.shields.io/badge/conda-environment-44A833" />
-  <img height="20" src="https://img.shields.io/badge/cuda-12.1-76B900" />
-  <img height="20" src="https://img.shields.io/badge/linux-ubuntu-lightgrey" />
-  <img height="20" src="https://img.shields.io/badge/latex-paper%20first-008080" />
+  <img height="20" src="https://img.shields.io/badge/python-3.10-3776AB?logo=python&amp;logoColor=white" />
+  <img height="20" src="https://img.shields.io/badge/pytorch-2.4-EE4C2C?logo=pytorch&amp;logoColor=white" />
+  <img height="20" src="https://img.shields.io/badge/torchvision-0.19-EE4C2C" />
+  <img height="20" src="https://img.shields.io/badge/cuda-12.1-76B900?logo=nvidia&amp;logoColor=white" />
+  <img height="20" src="https://img.shields.io/badge/opencv-configured-5C3EE8?logo=opencv&amp;logoColor=white" />
+  <img height="20" src="https://img.shields.io/badge/conda-environment-44A833?logo=anaconda&amp;logoColor=white" />
 </p>
 
 QDCR-Net is a paper-first underwater detection scaffold built around a lightweight
