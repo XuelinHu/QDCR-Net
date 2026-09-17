@@ -243,3 +243,23 @@ Generated sample configs are written here by scripts:
 4. `src/datasets/underwater_detection.py`
 5. `src/engine/detection_ops.py`
 6. `src/models/qdcr_net.py`
+
+<!-- codex-runtime-notes:start -->
+
+## Runtime Ports And Database Configuration
+
+### Database
+- No application database is used. Training and evaluation use local YAML configs, datasets, checkpoints, and result files.
+
+### Default Ports
+- No default web service or database port is defined.
+
+### Notes
+- Use the Conda environment described in `environment.linux.yml` for experiments.
+
+### Source Files Checked
+- `environment.linux.yml`
+- `configs/*.yaml`
+- `README.md`
+
+<!-- codex-runtime-notes:end -->
